@@ -1,5 +1,8 @@
 <template>
-    <div></div>
+    <div>B Y E
+        <helloWorld></helloWorld>
+        <Bar></Bar>
+    </div>
 </template>
 
 <script>
