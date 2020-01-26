@@ -2,10 +2,13 @@
   <div id="app">
     <div class="top-nav">
 
-      <router-link :to="{ name: 'dogs', params: {dog_id: this.$store.state.selectedDogId}}"><div class="nav-element">{{selectedDog.name}}</div></router-link>
-      <router-link to="/dogs/1"><div class="nav-element">Dog#1</div></router-link>
-      <router-link to="/dogs/2"><div class="nav-element">Dog#2</div></router-link>
-      <div class="push"><router-link to="/NewDog"><div class="nav-element" v-on:click="addDogClicked">Add your dog!</div></router-link></div>
+      <router-link :to="{ name: 'dog', params: {dog_id: this.$store.state.selectedDogId}}"><div class="nav-element">{{selectedDog.name}}</div></router-link>
+      <router-link to="/dog/1"><div class="nav-element">Dog#1</div></router-link>
+      <router-link to="/dog/2"><div class="nav-element">Dog#2</div></router-link>
+      <div class="push">
+        <router-link to="/NewDog"><div class="nav-element" v-on:click="addDogClicked">Add your dog!</div></router-link>
+      </div>
+      <router-link :to="{ path: userInfo.linkPath }"><div class="nav-element">{{userInfo.linkText}}</div></router-link>
 
     </div>
     <!-- route outlet -->
@@ -27,6 +30,16 @@ export default {
     selectedDog() {
       return this.$store.getters.selectedDog;
     },
+    userInfo() {
+      let linkText = "Sign In! (Google)";
+      let linkPath = '/sign_in';
+      let owner = this.$store.getters.ownerById(this.$store.state.userId);
+      if (owner !== undefined) {
+        linkText = owner.name;
+        linkPath = '/owner/' + owner.id;
+      }
+      return {linkText, linkPath};
+    }
   },
   methods: {
     addDogClicked() {
@@ -105,7 +118,8 @@ body {
   padding:000px;
   margin-top: 0px;
   height: 100%;
-  width: 1000px;
+  width: 100%;
+  max-width: 1000px;
   position: relative;
   align-items: flex-start;
 }

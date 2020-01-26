@@ -13,6 +13,8 @@ import byeWorld from './components/ByeWorld'
 import helloWorld from './components/HelloWorld';
 import overview from './components/Overview.vue';
 import newDog from './components/NewDog.vue';
+import owner from './components/Owner.vue';
+import ownerEdit from './components/OwnerEdit.vue';
 
 Vue.config.productionTip = false;
 
@@ -38,10 +40,10 @@ const store = new Vuex.Store({
         birthDate: "2019-02-10",
         color: "Orange/Breeki",
         tattoo: "???",
-        ownerId: 1
+        ownerId: 0
       },
     ],
-    owners: [
+    owners: [ //'owner' is basically a 'user'
       {
         id: 0,
         name: "Khromov Aleksei",
@@ -62,7 +64,7 @@ const store = new Vuex.Store({
     dogById: state => id => {
       return state.dogs.find(dog => dog.id === id)
     },
-    getOwner: state => id => {
+    ownerById: state => id => {
       return state.owners.find (owner => owner.id === id)
     }
   },
@@ -75,7 +77,13 @@ const store = new Vuex.Store({
       let i = state.dogs.indexOf(state.dogs.find(dog => dog.id === id));  //this is dog's actual index in an array
       state.dogs.splice(i,1);
       state.dogs.push(payload);
-      }
+      },
+    ownerUpdate(state, payload) {
+      let owner = state.owners.find(owner => owner.id === state.userId)
+      let i = state.owners.indexOf(owner);
+      state.owners.splice(i,1);
+      state.owners.push(payload);
+    }
   }
 })
 
@@ -84,9 +92,11 @@ const routes = [
   { path: '/hw', component: helloWorld, props: {msg: 'HELOL'} },
   { path: '/foo', component: Foo },
   { path: '/', name: 'home'},
-  { path: '/dogs/:dog_id', name: 'dogs', component: overview},
-  { path: '/NewDog', name: 'newdog', component: newDog},
-  { path: '/edit/:dog_id', name: 'edit', component: newDog},
+  { path: '/dog/:dog_id', name: 'dog', component: overview},
+  { path: '/NewDog', name: 'dog_new', component: newDog},
+  { path: '/dog/:dog_id/edit', name: 'dog_edit', component: newDog},
+  { path: '/owner/:owner_id', name: 'owner', component: owner},
+  { path: '/edit_profile', name: 'owner_edit', component: ownerEdit },
 ];
 
 const router = new VueRouter({

@@ -57,7 +57,7 @@
                 return dogFound && this.dogToEdit.ownerId === this.$store.state.userId //dog from the URL exists and belongs to the current user
             },
             newDogAllowed() {
-                return this.$route.name === 'newdog';
+                return this.$route.name === 'dog_new';
             }
         },
         methods: {
@@ -66,7 +66,7 @@
                 let redirectIndex = String(this.dogInput.id);
                 if (this.newDogAllowed) {
                     this.$store.commit('dogPush', objectToPass);
-                    this.$router.push({name: 'dogs', params: {dog_id: redirectIndex}})
+                    this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
                 }
             },
 
@@ -75,7 +75,7 @@
                 let redirectIndex = String(this.dogInput.id);
                 if (this.editAllowed) {
                     this.$store.commit('dogUpdate', objectToPass);
-                    this.$router.push({name: 'dogs', params: {dog_id: redirectIndex}})
+                    this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
                 }
             },
 

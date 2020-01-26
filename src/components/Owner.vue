@@ -1,34 +1,40 @@
 <template>
     <div class="overview">
-        <div class="pagename"><h2>Dog Passport</h2></div>
+        <div class="pagename"><h2>Your Profile</h2></div>
         <div class="page">
-            <div class="passport-info"  v-if="!dogToView"><h1>Oops!<br><br>Noone lives here :(</h1></div>
-            <div class="passport-info"  v-if="!!dogToView">
+            <div class="passport-info"  v-if="!ownerFound"><h1>Oops!<br><br>Noone lives here :(</h1></div>
+            <div class="passport-info"  v-if="ownerFound">
                 <div class="passport-info-record">
-                    <h1>{{dogToView ? dogToView.name : ""}}</h1>
-                    <h3>{{dogToView ? dogToView.breed : ""}}</h3>
-                    <h3>{{dogToView ? dogToView.sex : ""}}</h3>
+                    <h1>{{ownerFound ? ownerToView.name : ""}}</h1>
+                    <h3>{{ownerFound ? ownerToView.country : ""}}</h3>
+                    <h3>{{ownerFound ? ownerToView.city : ""}}</h3>
                 </div>
                 <div class="passport-info-record">
-                    <h2>Age: <span class="record">{{dogToView ? dogAge : ""}}</span></h2>
-                    <div class="pushright">Birth Date: {{dogToView ? dogToView.birthDate : ""}}</div>
+                    <h2>E-mail: <span class="record">{{ownerFound ? ownerToView.email : ""}}</span></h2>
                 </div>
                 <div class="passport-info-record">
-                    <h2>Color: <span class="record">{{dogToView ? dogToView.color : ""}}</span></h2>
-                </div>
-                <div class="passport-info-record">
-                    <h2>Tattoo: <span class="record">{{dogToView ? dogToView.tattoo : ""}}</span></h2>
-                </div>
-                <div class="passport-info-record">
-                    <h2>Owner: <span class="record link-like" v-on:click="goToOwner">{{dogOwner ? dogOwner.name : ""}}</span></h2>
-                    <div class="pushright">
-                        {{dogOwner ? dogOwner.country : ""}}, {{dogOwner ? dogOwner.city : ""}} <br>
-                        E-mail: {{dogOwner ? dogOwner.email : ""}} <br>
-                        Phone: {{dogOwner ? dogOwner.phone : ""}}
-                    </div>
-                    <button class="button-commit" v-on:click="goToEdit" v-if="showEditButton">Edit</button>
+                    <h2>Phone: <span class="record">{{ownerFound ? ownerToView.phone : ""}}</span></h2>                    <button class="button-commit" v-on:click="goToEditOwner">Edit</button>
                 </div>
 
+                <div class="passport-info-record">
+                    <h2>Dogs: <span class="record">{{ownerFound ? "" : ""}}</span></h2>
+                    <div class="pushright">
+                        <table class="dogs-table">
+                            <tr v-for="dog in userDogs" v-bind:key="dog.id">
+                                <td class="link-like" v-on:click="goToDog(dog.id)">
+                                    {{dog.name}}
+                                </td>
+                                <td>
+                                    {{dog.breed}}
+                                </td>
+                                <td>
+                                    {{dog.sex}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
             </div>
             <div class="photo">PHOTO</div>
         </div>
@@ -37,41 +43,44 @@
 
 <script>
     export default {
-        name: "overview",
+        name: "owner",
         data() {
             return {
             }
         },
         computed: {
+            ownerFound() {
+                return (this.$store.getters.ownerById(Number(this.$route.params.owner_id)) != null);
+            },
+
             userDogs() {
                 return this.$store.getters.userDogs
             },
-            dogToView() {
-                let dog = this.$store.getters.dogById(Number(this.$route.params.dog_id));
-                if (dog == null) {
+
+            ownerToView() {
+                let owner = this.$store.getters.ownerById(Number(this.$route.params.owner_id));
+                if (owner == null) {
                    // alert("null");
                 }
-                return dog;
+                return owner;
             },
-            dogAge() {
+         /*   dogAge() {
                 let delta = new Date (new Date() - new Date(this.dogToView.birthDate)); //delta in milliseconds
                 let years = delta.getFullYear()-1970;
                 let months = delta.getMonth();
                 return years + ' years, ' + months + ' months';
-            },
-            dogOwner() {
-                return this.$store.getters.ownerById(this.dogToView.ownerId)
-            },
+            },*/
+
             showEditButton() {
-                return this.dogToView.ownerId === this.$store.state.userId;
+                return true;
             }
         },
         methods: {
-            goToEdit() {
-                this.$router.push({name: 'dog_edit', params: {dog_id: this.$route.params.dog_id}});
+            goToEditOwner() {
+                this.$router.push({name: 'owner_edit'});
             },
-            goToOwner() {
-                this.$router.push({name: 'owner', params: {owner_id: this.dogToView.ownerId}})
+            goToDog(id) {
+                this.$router.push({name: 'dog', params: {dog_id: id}})
             }
         }
     }
@@ -126,22 +135,24 @@
 
     .photo {
         width: 200px;
+        min-width: 200px;
         height: 300px;
         background-color: brown;
     }
 
     .passport-info {
-        margin: 50px;
+        margin: 0px;
         line-height: 30px;
         display: flex;
         flex-direction: column;
-        width: 600px;
+        width: 800px;
     }
 
     .passport-info-record {
         position: relative;
-        padding-bottom: 50px;
         width: 100%;
+        margin-left: 50px;
+        margin-top: 50px;
     }
 
     .record {
@@ -163,5 +174,12 @@
     .link-like {
         cursor: pointer;
         text-decoration: underline;
+        color: darkblue;
+        font-weight: bold;
+    }
+
+    .dogs-table, tr, td {
+        padding-right: 80px;
+        font-size: 19px;
     }
 </style>
