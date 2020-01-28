@@ -6,6 +6,7 @@ import App from './App.vue'
 import Foo from './external.js';
 
 
+
 Vue.use(VueRouter);
 Vue.use(Vuex);
 
@@ -20,6 +21,7 @@ Vue.config.productionTip = false;
 
 const store = new Vuex.Store({
   state: {
+    isLoggedIn: false,
     count: 4,
     userId: 0,
     selectedDogId: 0,
@@ -46,6 +48,7 @@ const store = new Vuex.Store({
     owners: [ //'owner' is basically a 'user'
       {
         id: 0,
+        id_token: '',
         name: "Khromov Aleksei",
         country: "Russia",
         city: "Saint-Petersburg",
