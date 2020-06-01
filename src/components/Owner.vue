@@ -1,26 +1,27 @@
 <template>
     <div class="overview">
-        <div class="pagename"><h2>Your Profile</h2></div>
+        <div class="pagename"><h2>{{whoseProfile}}</h2></div>
         <div class="page">
             <div class="passport-info"  v-if="!ownerFound"><h1>Oops!<br><br>Noone lives here :(</h1></div>
             <div class="passport-info"  v-if="ownerFound">
                 <div class="passport-info-record">
-                    <h1>{{ownerFound ? ownerToView.name : ""}}</h1>
-                    <h3>{{ownerFound ? ownerToView.country : ""}}</h3>
-                    <h3>{{ownerFound ? ownerToView.city : ""}}</h3>
+                    <h1>{{ownerLoaded ? ownerToView.name : ""}}</h1>
+                    <h3>{{ownerLoaded ? ownerToView.country : ""}}</h3>
+                    <h3>{{ownerLoaded ? ownerToView.city : ""}}</h3>
                 </div>
                 <div class="passport-info-record">
-                    <h2>E-mail: <span class="record">{{ownerFound ? ownerToView.email : ""}}</span></h2>
+                    <h2>E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
                 </div>
                 <div class="passport-info-record">
-                    <h2>Phone: <span class="record">{{ownerFound ? ownerToView.phone : ""}}</span></h2>                    <button class="button-commit" v-on:click="goToEditOwner">Edit</button>
+                    <h2>Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
+                    <button class="button-commit" v-on:click="goToEditOwner" v-if="showEditButton">Edit</button>
                 </div>
 
                 <div class="passport-info-record">
-                    <h2>Dogs: <span class="record">{{ownerFound ? "" : ""}}</span></h2>
+                    <h2>Dogs: <span class="record">{{ownerLoaded ? "" : ""}}</span></h2>
                     <div class="pushright">
                         <table class="dogs-table">
-                            <tr v-for="dog in userDogs" v-bind:key="dog.id">
+                            <tr v-for="dog in ownerDogs" v-bind:key="dog.id">
                                 <td class="link-like" v-on:click="goToDog(dog.id)">
                                     {{dog.name}}
                                 </td>
@@ -46,21 +47,37 @@
         name: "owner",
         data() {
             return {
+                ownerLoaded: false,
+                ownerFound: true,  //"presumably"
             }
         },
+        created() {
+            this.$store.commit('wipeData');
+            this.$store.dispatch('getOwnerInfo', this.$route.params.owner_id).then(()=> {
+                this.ownerLoaded = true;
+            }).catch(()=>{
+                this.ownerFound = false;
+            });
+        },
         computed: {
-            ownerFound() {
-                return (this.$store.getters.ownerById(Number(this.$route.params.owner_id)) != null);
+            whoseProfile() {
+                if (this.$route.params.owner_id === this.$store.state.user.id) {
+                    return "Your Profile";
+                } else {return "Owner Profile";}
             },
 
-            userDogs() {
-                return this.$store.getters.userDogs
+            ownerDogs() {
+                return this.$store.getters.getOwnerDogs(this.$route.params.owner_id);
             },
 
             ownerToView() {
-                let owner = this.$store.getters.ownerById(Number(this.$route.params.owner_id));
+                let ownerId = this.$route.params.owner_id;
+                //if (ownerId === this.$store.state.user.id) {
+                  //  return this.$store.state.user;
+                //}
+                let owner = this.$store.getters.ownerById(ownerId);
                 if (owner == null) {
-                   // alert("null");
+                   // alert("owner - null!");
                 }
                 return owner;
             },
@@ -72,7 +89,7 @@
             },*/
 
             showEditButton() {
-                return true;
+                return this.$route.params.owner_id === this.$store.state.user.id;
             }
         },
         methods: {
@@ -80,7 +97,7 @@
                 this.$router.push({name: 'owner_edit'});
             },
             goToDog(id) {
-                this.$router.push({name: 'dog', params: {dog_id: id}})
+                this.$router.push({name: 'dog', params: {dog_id: id, tab: 'passport'}})
             }
         }
     }

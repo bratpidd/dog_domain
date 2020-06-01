@@ -15,7 +15,7 @@
                             <option>Male</option>
                             <option>Female</option>
                         </select><br>
-                        <h3>Birth Date: </h3><input autocomplete="ogds" type="date" v-model="dogInput.birthDate"><br>
+                        <h3>Birth Date: </h3><input autocomplete="ogds" type="date" v-model="dogInput.birthdate"><br>
                         <h3>Color: </h3><input autocomplete="nfgcv" v-model="dogInput.color"><br>
                         <h3>Tattoo: </h3><input autocomplete="jjfds" v-model="dogInput.tattoo"><br>
                     </form>
@@ -42,7 +42,7 @@
                     name: "",
                     breed: "",
                     sex: "",
-                    birthDate: "",
+                    birthdate: "",
                     color: "",
                     tattoo: ""
                 }
@@ -53,8 +53,7 @@
                 return this.$store.getters.dogById(Number(this.$route.params.dog_id))
             },
             editAllowed() {
-                let dogFound = (this.dogToEdit !== undefined);
-                return dogFound && this.dogToEdit.ownerId === this.$store.state.userId //dog from the URL exists and belongs to the current user
+                return this.$route.name === 'dog_edit';
             },
             newDogAllowed() {
                 return this.$route.name === 'dog_new';
@@ -62,45 +61,52 @@
         },
         methods: {
             commitNewDog() {
-                let objectToPass = JSON.parse(JSON.stringify(this.dogInput));   //need to prevent dogInput from being linked to vuex store
-                let redirectIndex = String(this.dogInput.id);
+                let objectToPass = JSON.parse(JSON.stringify(this.dogInput));   //prevent dogInput from being linked to vuex store (although it must be safe here)
+                //let redirectIndex = String(this.dogInput.id);
                 if (this.newDogAllowed) {
-                    this.$store.commit('dogPush', objectToPass);
-                    this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
+                    this.$store.dispatch('newDog', objectToPass);
+                    //this.$store.commit('dogPush', objectToPass);
+                    //this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
                 }
             },
 
             commitUpdate() {
                 let objectToPass = JSON.parse(JSON.stringify(this.dogInput));   //need to prevent dogInput from being linked to vuex store
                 let redirectIndex = String(this.dogInput.id);
-                if (this.editAllowed) {
-                    this.$store.commit('dogUpdate', objectToPass);
-                    this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
-                }
+                this.$store.dispatch('updateDog', objectToPass).then(() => {
+                    this.$store.dispatch('getUserInfo');
+                    if (this.editAllowed) {
+                        //this.$store.commit('dogUpdate', objectToPass);
+                        this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
+                    }
+                });
             },
 
             resetInputs() {
                 this.dogInput = {
-                    ownerId: this.$store.state.userId,
+                    //ownerId: this.$store.state.user.id,
                     name: "",
                     breed: "",
                     sex: "",
-                    birthDate: "",
+                    birthdate: "",
                     color: "",
-                    tattoo: "DDD",
-                    id: 2
+                    tattoo: "",
+                    //id: 2
                 }
             }
         },
         created: function() {
-            if (!this.editAllowed && !this.newDogAllowed) {
-                this.$router.push('/');
-            }
-            this.resetInputs();
+            //if (!this.editAllowed && !this.newDogAllowed) {
+            //    this.$router.push('/');
+            //}
+            //this.resetInputs();
+
             if (this.editAllowed) {
-                this.dogInput = JSON.parse(JSON.stringify(this.dogToEdit)); //since dogInput is all about v-models, it has to be a separate object to leave vuex store unmodified
+                this.$store.dispatch('getDog', this.$route.params.dog_id).then(() => {
+                    this.dogInput = JSON.parse(JSON.stringify(this.$store.state.dogs[0]));
+                });
+                //this.dogInput = JSON.parse(JSON.stringify(this.dogToEdit)); //since dogInput is all about v-models, it has to be a separate object to leave vuex store unmodified
             }
-            //TODO: identify a new dog's ID and assign here (or not)
         }
     }
 </script>

@@ -1,10 +1,7 @@
 <template>
   <div id="app">
     <div class="top-nav">
-
-      <router-link :to="{ name: 'dog', params: {dog_id: this.$store.state.selectedDogId}}"><div class="nav-element">{{selectedDog.name}}</div></router-link>
-      <router-link to="/dog/1"><div class="nav-element">Dog#1</div></router-link>
-      <router-link to="/dog/2"><div class="nav-element">Dog#2</div></router-link>
+      <router-link v-for="dog in this.$store.state.userDogs" :to="{ name: 'dog', params: {dog_id: dog.id, tab: $route.params.tab ? $route.params.tab: 'passport'}}" v-bind:key="dog.id"><div class="nav-element">{{dog.name}}</div></router-link>
       <div class="push">
         <router-link to="/NewDog"><div class="nav-element" v-on:click="addDogClicked" v-if="loggedIn">Add your dog!</div></router-link>
       </div>
@@ -12,9 +9,12 @@
 
       <div class="nav-element" v-if="loggedIn" v-on:click="signOut">Log Out</div>
 
-      <div id="google-signin-btn"></div>
-      <div class="nav-element gbutton-placeholder" v-bind:class="{ 'placeholder-wide': !loggedIn, 'placeholder-wide' : loggedIn }">PLACEHOLDER</div>
-    </div>{{loggedIn}}
+      <div class="placeholder-wide">
+          <div id="google-signin-btn"></div>
+      </div>
+
+
+    </div>
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
 
@@ -35,16 +35,30 @@ export default {
         name: "",
         email: "",
         ID: "",
-        tokenID: "",
+        tokenId: "",
       },
       loggedIn: false,
+      response: "",
     }
   },
   mounted() {
-    this.renderGBtn();
+    window.addEventListener("google-loaded", () => {
+      this.renderGBtn();
+    });
+
+    this.$store.dispatch('getUserInfo').then(() => {  //same as loadUserInfo but not loadUserInfo (to avoid something recursion-like)
+      this.loggedIn = true;
+      this.$root.$emit('user_data_loaded');
+      if (this.$route.name === 'home') {
+        this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
+      }
+      //
+      //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
+    //  this.renderGBtn();
+    }).catch(() => {})
   },
   created() {
-    this.loggedIn = (this.getCookie('isLoggedIn') === 'true');
+
   },
   computed: {
     str_a() {
@@ -56,12 +70,9 @@ export default {
     userInfo() {
       let linkText = "Sign In! (Google)";
       let linkPath = '/sign_in';
-      let owner = this.$store.getters.ownerById(this.$store.state.userId);
-      if (owner !== undefined) {
-        //linkText = owner.name;
-        linkText = this.user.name;
-        linkPath = '/owner/' + owner.id;
-      }
+      let user = this.$store.state.user;
+      linkText = user.name;
+      linkPath = '/owner/' + user.id;
       return {linkText, linkPath};
     }
   },
@@ -69,43 +80,40 @@ export default {
     addDogClicked() {
       this.$root.$emit('new_dog_clicked');
     },
-    getCookie(cname) {
-      var name = cname + "=";
-      var ca = document.cookie.split(';');
-      for(var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) === ' ') {
-          c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-          return c.substring(name.length, c.length);
-        }
-      }
-      return "";
+    loadUserInfo () {
+      this.$store.dispatch('getUserInfo').then(() => {
+        this.loggedIn = true;
+        this.$root.$emit('user_data_loaded');       //
+        //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
+      }).catch(() => {})
+
     },
     signOut() {
-      let auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(() => {
-        document.cookie = "isLoggedIn=false";
-        this.loggedIn = false;
-        //
-      });
+      this.loggedIn = false;
+      document.cookie = "auth_token=false; path=/";
+//      this.googleBtnRendered = false;
+  //    if (this.googleBtnRendered) {
+      // eslint-disable-next-line no-undef
+        let auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(() => {
+          this.$store.commit('wipeUserData');
+        });
+    //  } else {this.renderGBtn();}
     },
-    onSignIn(user) {
-      const profile = user.getBasicProfile();
-      //alert(profile.getName());
-      this.user.name = profile.getName();
-      this.user.email = profile.getEmail();
-      this.user.ID = profile.getId();
-      this.user.tokenID = user.getAuthResponse().id_token;
-      this.loggedIn = true;
-      document.cookie = "isLoggedIn=true";
+    onSignIn() {  //could be "user" inside
+      if (!this.loggedIn) {
+        this.$store.dispatch('authRequest').then(() => {
+          this.loadUserInfo();
+        });
+      } else {
+        this.loadUserInfo();
+      }
     },
     onSignInFailure() {
-      this.loggedIn = false;
-      document.cookie = "isLoggedIn=false";
+     // this.loggedIn = false;
     },
     renderGBtn() {
+      // eslint-disable-next-line no-undef
       gapi.signin2.render('google-signin-btn', { // this is the button "id"
         onsuccess: this.onSignIn,
         onfailure: this.onSignInFailure,
@@ -114,6 +122,13 @@ export default {
         scope: 'email',
         prompt: 'select_account',
       });
+      this.googleBtnRendered = true;
+    },
+    authRequest() {
+      this.$store.dispatch('authRequest');
+    },
+    getUserInfo(){
+      this.$store.dispatch('getUserInfo');
     }
   },
 
@@ -132,23 +147,27 @@ export default {
   background-color: #333333;
   display: flex;
   flex-direction: column;
-  position: absolute;
-  height: 100%;
+  align-items: stretch;
+  align-content: stretch;
   width: 100%;
- overflow: hidden;
+  height: auto;
+  min-height: 100% !important;
 }
 
-body {
+.text-black {
+  color: black;
+}
+
+body, html {
   margin: 0;
+  height:100%
 }
-
-
 
 .top-nav {
   background-color: gray;
   position:relative;
   height: 40px;
-  width: calc(100% + 110px);
+  width: calc(100%);
   margin: 0;
   padding: 0;
   display: flex;
@@ -167,7 +186,7 @@ body {
   }
 
   .top-nav .placeholder-wide {
-    width: 110px;
+
     padding: 0;
   }
 
@@ -192,6 +211,7 @@ body {
 
 .pagebox {
   display: flex;
+  flex: 1;
   flex-direction: column;
   background-color: lightgray;
   padding:0px;

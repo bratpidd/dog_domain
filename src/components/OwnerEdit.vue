@@ -37,11 +37,8 @@
             }
         },
         computed: {
-            ownerToEdit() {
-                return this.$store.getters.ownerById(Number(this.$store.state.userId))
-            },
             editAllowed() {
-                return this.ownerToEdit !== undefined;
+                return true;
             },
         },
         methods: {
@@ -49,16 +46,24 @@
                 let objectToPass = JSON.parse(JSON.stringify(this.ownerInput));   //need to prevent Input from being linked to vuex store
                 let redirectIndex = String(this.ownerInput.id);
                 if (this.editAllowed) {
-                    this.$store.commit('ownerUpdate', objectToPass);
-                    this.$router.push({name: 'owner', params: {owner_id: redirectIndex}})
+                    //this.$store.commit('ownerUpdate', objectToPass);
+                    this.$store.dispatch('updateUser', objectToPass).then(() => {
+                        this.$store.dispatch('getUserInfo').then(() => {
+                            this.$router.push({name: 'owner', params: {owner_id: redirectIndex}})
+                        })
+                    });
                 }
             },
         },
         created: function() {
-            if (this.editAllowed) {
-                this.ownerInput = JSON.parse(JSON.stringify(this.ownerToEdit)); //since Input is all about v-models, it has to be a separate object to leave vuex store unmodified
-            }
-        }
+            //if (this.editAllowed) {
+            this.ownerInput = JSON.parse(JSON.stringify(this.$store.state.user));
+        },
+        mounted() {
+            this.$root.$on('user_data_loaded',() => {
+                this.ownerInput = JSON.parse(JSON.stringify(this.$store.state.user));
+            });
+        },
     }
 </script>
 
