@@ -22,6 +22,7 @@ import overview from './components/Overview.vue';
 import newDog from './components/NewDog.vue';
 import owner from './components/Owner.vue';
 import ownerEdit from './components/OwnerEdit.vue';
+import home from './components/Home.vue';
 
 Vue.config.productionTip = false;
 // state declaration:
@@ -251,7 +252,7 @@ const routes = [
   { path: '/bw', component: byeWorld },
   { path: '/hw', component: helloWorld, props: {msg: 'HELOL'} },
   { path: '/foo', component: Foo },
-  { path: '/', name: 'home'},
+  { path: '/', name: 'home', component: home},
   { path: '/dog/:dog_id/:tab', name: 'dog', component: overview},
   { path: '/NewDog', name: 'dog_new', component: newDog},
   { path: '/dog/:dog_id/edit', name: 'dog_edit', component: newDog},

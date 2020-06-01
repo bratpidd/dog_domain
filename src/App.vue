@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <div class="top-nav">
+    <div class="top-nav" v-if="loggedIn || $route.name !== 'home'">
+      <router-link to="/"><div class="nav-element" v-on:click="homeClicked">Home</div></router-link>
       <router-link v-for="dog in this.$store.state.userDogs" :to="{ name: 'dog', params: {dog_id: dog.id, tab: $route.params.tab ? $route.params.tab: 'passport'}}" v-bind:key="dog.id"><div class="nav-element">{{dog.name}}</div></router-link>
       <div class="push">
         <router-link to="/NewDog"><div class="nav-element" v-on:click="addDogClicked" v-if="loggedIn">Add your dog!</div></router-link>
@@ -10,18 +11,14 @@
       <div class="nav-element" v-if="loggedIn" v-on:click="signOut">Log Out</div>
 
       <div class="placeholder-wide">
-          <div id="google-signin-btn"></div>
-      </div>
-
-
-    </div>
-    <!-- route outlet -->
-    <!-- component matched by the route will render here -->
-
-      <div class="pagebox">
-        <router-view></router-view>
+          <div id="google-signin-btn" v-if="!loggedIn"></div>
       </div>
     </div>
+
+    <div class="pagebox">
+      <router-view></router-view>
+    </div>
+  </div>
 
 </template>
 
@@ -31,6 +28,7 @@ export default {
   name: 'app',
   data() {
     return {
+      gbtnHomeRenderRequest: false,
       user: {
         name: "",
         email: "",
@@ -42,15 +40,16 @@ export default {
     }
   },
   mounted() {
+    //this.renderGBtn('google-signin-btn');
     window.addEventListener("google-loaded", () => {
-      this.renderGBtn();
+      this.renderGBtn('google-signin-btn');
     });
 
     this.$store.dispatch('getUserInfo').then(() => {  //same as loadUserInfo but not loadUserInfo (to avoid something recursion-like)
       this.loggedIn = true;
       this.$root.$emit('user_data_loaded');
       if (this.$route.name === 'home') {
-        this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
+        //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
       }
       //
       //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
@@ -77,6 +76,11 @@ export default {
     }
   },
   methods: {
+    homeClicked() {
+      //this.$root.$emit('home_clicked');   //this event does not reach the child
+      this.gbtnHomeRenderRequest = true;
+
+    },
     addDogClicked() {
       this.$root.$emit('new_dog_clicked');
     },
@@ -85,6 +89,9 @@ export default {
         this.loggedIn = true;
         this.$root.$emit('user_data_loaded');       //
         //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
+        if (this.$route.name === 'home') {
+          //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
+        }
       }).catch(() => {})
 
     },
@@ -97,6 +104,11 @@ export default {
         let auth2 = gapi.auth2.getAuthInstance();
         auth2.signOut().then(() => {
           this.$store.commit('wipeUserData');
+          if (this.$route.name === 'home'){
+            this.renderGBtn('google-signin-btn-home')
+          } else {
+            this.renderGBtn('google-signin-btn');
+          }
         });
     //  } else {this.renderGBtn();}
     },
@@ -112,13 +124,13 @@ export default {
     onSignInFailure() {
      // this.loggedIn = false;
     },
-    renderGBtn() {
+    renderGBtn(buttonId) {
       // eslint-disable-next-line no-undef
-      gapi.signin2.render('google-signin-btn', { // this is the button "id"
+      gapi.signin2.render(buttonId, { // this is the button "id"
         onsuccess: this.onSignIn,
         onfailure: this.onSignInFailure,
         height: 40,
-        width: 110,
+        width: buttonId === 'google-signin-btn-home' ? 110 : 110,
         scope: 'email',
         prompt: 'select_account',
       });
@@ -158,6 +170,15 @@ export default {
   color: black;
 }
 
+span[id^=not_signed_]{
+  visibility: hidden;
+}
+
+span[id^=not_signed_]:before {
+  content: 'Sign in';
+  visibility: visible;
+}
+
 body, html {
   margin: 0;
   height:100%
@@ -168,8 +189,12 @@ body, html {
   position:relative;
   height: 40px;
   width: calc(100%);
-  margin: 0;
-  padding: 0;
+  max-width: 1000px;
+  margin-left: max((100% - 1000px)/2, 0.000000000000001px);
+
+  margin-right: max((100% - 1000px)/2, 0.0000000000000001%);
+
+
   display: flex;
 
 }
@@ -217,8 +242,8 @@ body, html {
   padding:0px;
   margin-top: 0px;
   height: 100%;
-  width: 100%;
   max-width: 1000px;
+  width: 100%;
   position: relative;
   align-items: flex-start;
   align-self: center;

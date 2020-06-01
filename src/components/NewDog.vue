@@ -8,16 +8,16 @@
             <div class="passport-info">
                 <div class="passport-info-record">
                     <form name="fuckoff" autocomplete="off">
-                        <h3>Name: </h3><input autocomplete="jdty" v-model="dogInput.name"><br>
-                        <h3>Breed: </h3><input autocomplete="hasdf" v-model="dogInput.breed"><br>
-                        <h3>Sex: </h3>
-                        <select id="sex" v-model="dogInput.sex">
-                            <option>Male</option>
-                            <option>Female</option>
-                        </select><br>
-                        <h3>Birth Date: </h3><input autocomplete="ogds" type="date" v-model="dogInput.birthdate"><br>
-                        <h3>Color: </h3><input autocomplete="nfgcv" v-model="dogInput.color"><br>
-                        <h3>Tattoo: </h3><input autocomplete="jjfds" v-model="dogInput.tattoo"><br>
+                            <div class="wannabe-h3">Name: </div><input autocomplete="jdty" v-model="dogInput.name"><br>
+                            <div class="wannabe-h3">Breed: </div><input autocomplete="hasdf" v-model="dogInput.breed"><br>
+                            <div class="wannabe-h3">Sex: </div>
+                            <select id="sex" v-model="dogInput.sex">
+                                <option>Male</option>
+                                <option>Female</option>
+                            </select><br>
+                            <div class="wannabe-h3">Birth Date: </div><input autocomplete="ogds" type="date" v-model="dogInput.birthdate"><br>
+                            <div class="wannabe-h3">Color: </div><input autocomplete="nfgcv" v-model="dogInput.color"><br>
+                            <div class="wannabe-h3">Tattoo: </div><input autocomplete="jjfds" v-model="dogInput.tattoo"><br>
                     </form>
                     <button class="button-commit" v-on:click="commitNewDog" v-if="newDogAllowed">Create Profile</button>
                     <button class="button-commit" v-on:click="commitUpdate" v-if="editAllowed">Save</button>
@@ -77,7 +77,7 @@
                     this.$store.dispatch('getUserInfo');
                     if (this.editAllowed) {
                         //this.$store.commit('dogUpdate', objectToPass);
-                        this.$router.push({name: 'dog', params: {dog_id: redirectIndex}})
+                        this.$router.push({name: 'dog', params: {dog_id: redirectIndex, tab: 'passport'}})
                     }
                 });
             },
@@ -122,6 +122,13 @@
         margin-bottom: 5px;
         margin-top: 5px;
         display: inline;
+    }
+
+    .wannabe-h3 {
+        width: 130px;
+        font-size: 1.17em;
+        font-weight: bolder;
+        display: inline-block;
     }
 
     body {
