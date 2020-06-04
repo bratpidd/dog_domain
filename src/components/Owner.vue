@@ -10,10 +10,10 @@
                     <h3>{{ownerLoaded ? ownerToView.city : ""}}</h3>
                 </div>
                 <div class="passport-info-record">
-                    <h2>E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
+                    <h2 v-if="ownerInfoExists.email">E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
                 </div>
                 <div class="passport-info-record">
-                    <h2>Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
+                    <h2 v-if="ownerInfoExists.phone">Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
                     <button class="button-commit" v-on:click="goToEditOwner" v-if="showEditButton">Edit</button>
                 </div>
 
@@ -49,6 +49,10 @@
             return {
                 ownerLoaded: false,
                 ownerFound: true,  //"presumably"
+                ownerInfoExists: {
+                    phone: false,
+                    email: false,
+                }
             }
         },
         created() {
@@ -76,6 +80,7 @@
                   //  return this.$store.state.user;
                 //}
                 let owner = this.$store.getters.ownerById(ownerId);
+                this.validateOwnerInfo(owner);
                 if (owner == null) {
                    // alert("owner - null!");
                 }
@@ -93,6 +98,15 @@
             }
         },
         methods: {
+            validateOwnerInfo (owner) {
+                if (owner.phone) {
+                    this.ownerInfoExists.phone = true;
+                }
+                if (owner.email) {
+                    this.ownerInfoExists.email = true;
+                }
+            },
+
             goToEditOwner() {
                 this.$router.push({name: 'owner_edit'});
             },

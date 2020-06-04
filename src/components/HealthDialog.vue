@@ -37,9 +37,9 @@
         computed: {
             title() {
                 switch (this.code) {
-                    case 1: return 'Flea and Tick Medication Update';
-                    case 2: return 'Intestinal parasites Medication Update';
-                    case 3: return 'Vaccination Update';
+                    case 1: return 'Flea and Tick';
+                    case 2: return 'Intestinal parasites';
+                    case 3: return 'Vaccination';
                     default: return 'error'
                 }
             },

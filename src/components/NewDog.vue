@@ -71,7 +71,7 @@
             },
 
             commitUpdate() {
-                let objectToPass = JSON.parse(JSON.stringify(this.dogInput));   //need to prevent dogInput from being linked to vuex store
+                let objectToPass = JSON.parse(JSON.stringify(this.dogInput));   //need to prevent dogInput from being linked to vuex store. although it must be already unlinked, see "created" below
                 let redirectIndex = String(this.dogInput.id);
                 this.$store.dispatch('updateDog', objectToPass).then(() => {
                     this.$store.dispatch('getUserInfo');

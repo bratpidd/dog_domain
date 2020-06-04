@@ -78,23 +78,28 @@ export default {
   methods: {
     homeClicked() {
       //this.$root.$emit('home_clicked');   //this event does not reach the child
-      this.gbtnHomeRenderRequest = true;
-
+      if (!this.loggedIn) {
+        this.gbtnHomeRenderRequest = true;
+      }
     },
     addDogClicked() {
       this.$root.$emit('new_dog_clicked');
     },
-    loadUserInfo () {
-      this.$store.dispatch('getUserInfo').then(() => {
-        this.loggedIn = true;
-        this.$root.$emit('user_data_loaded');       //
-        //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
-        if (this.$route.name === 'home') {
-          //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
-        }
-      }).catch(() => {})
 
+    loadUserInfo () {
+      return new Promise ((resolve, reject) => {
+        this.$store.dispatch('getUserInfo').then(() => {
+          this.loggedIn = true;
+          this.$root.$emit('user_data_loaded');       //
+          resolve();
+          //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
+          if (this.$route.name === 'home') {
+            //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
+          }
+        }).catch(() => {reject();})
+      });
     },
+
     signOut() {
       this.loggedIn = false;
       document.cookie = "auth_token=false; path=/";
@@ -114,8 +119,38 @@ export default {
     },
     onSignIn() {  //could be "user" inside
       if (!this.loggedIn) {
-        this.$store.dispatch('authRequest').then(() => {
-          this.loadUserInfo();
+        this.$store.dispatch('authRequest').then((msg) => {
+          this.loadUserInfo().then(() => {
+            if (msg === 'new_user') {     //this section generates a dog for any newcomer to boost user expirience
+              let dog = {
+                name: "Guard Dog",
+                breed: "The Shepherd",
+                sex: "Male",
+                birthdate: '2016-04-12',
+                color: "Black, Brown",
+                tattoo: "TEST" + this.$store.state.user.id
+              };
+              this.$store.dispatch('newDog', dog).then(() => {
+                let medInfo1 = {
+                  code: 1,
+                  duration: 84,
+                  date: '2020-05-22',
+                  brand: 'Test medication #' + this.$store.state.user.id,
+                  dogId: this.$store.state.dogs[0].id
+                };
+                let medInfo3 = {
+                  code: 3,
+                  duration: 365,
+                  date: '2018-03-13',
+                  brand: 'Test vaccine #' + this.$store.state.user.id,
+                  dogId: this.$store.state.userDogs[0].id
+                };
+                this.$store.dispatch('updateMedication', medInfo1);
+                this.$store.dispatch('updateMedication', medInfo3);
+                alert ('Guard Dog has joined you. Check it out!')
+              });
+            }
+          });
         });
       } else {
         this.loadUserInfo();
@@ -190,13 +225,12 @@ body, html {
   height: 40px;
   width: calc(100%);
   max-width: 1000px;
+
   margin-left: max((100% - 1000px)/2, 0.000000000000001px);
-
   margin-right: max((100% - 1000px)/2, 0.0000000000000001%);
-
-
+  /*for some reason "0px" or "0%" translates to simple "0" and formula refuses to work
+  there are more accurate ways to do what I wanted but whatever*/
   display: flex;
-
 }
   .top-nav .nav-element {
     background-color: black;
@@ -208,6 +242,9 @@ body, html {
     justify-content: center;
     color: white;
     cursor: pointer;
+    border-right-style: solid;
+    border-width: 1px;
+    border-color: #333333
   }
 
   .top-nav .placeholder-wide {

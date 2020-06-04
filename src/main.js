@@ -111,7 +111,7 @@ const store = new Vuex.Store({
             //alert (response.data.msg);
             let msg = response.data.msg;
             if ((msg === 'new_user')||(msg === 'auth_token_updated')) {
-              resolve();
+              resolve(msg);
             } else {reject();}
           });
         })
@@ -206,28 +206,40 @@ const store = new Vuex.Store({
     },
 
     getOwnerDogs(context, ownerId) {      //!! MAY BE UNUSED   !!IS USED RIGHT BELOW!!!      //LOAD owner's dogs AND (if it is user) reload user's dogs //may be not that necessary but whatever
-      axios.get('/1.php', {params: {action: 'get_owner_dogs', ownerId: ownerId}}).then((response) => {
-        let msg = response.data.msg;
-        if (msg === 'ok') {
-          let isUser = (ownerId === context.state.user.id);
-          if (isUser) {context.state.userDogs = [];}
-          response.data.dogs.forEach(dog => {
-            context.commit('dogPush', dog);
-            if (isUser) {context.commit('dogPushUser', dog);}
-          });
-        }
-        if (msg === 'no_cookie') {
-          context.dispatch('authRequest');
-        }
-      })
+      return new Promise((resolve, reject) => {
+        axios.get('/1.php', {params: {action: 'get_owner_dogs', ownerId: ownerId}}).then((response) => {
+          let msg = response.data.msg;
+          if (msg === 'ok') {
+            let isUser = (ownerId === context.state.user.id);
+            if (isUser) {
+              context.state.userDogs = [];
+            }
+            response.data.dogs.forEach(dog => {
+              context.commit('dogPush', dog);
+              if (isUser) {
+                context.commit('dogPushUser', dog);
+              }
+            });
+            resolve();
+          }
+          if (msg === 'no_cookie') {
+            context.dispatch('authRequest');
+            reject();
+          }
+        });
+      });
     },
 
     newDog (context, payload) {
-      axios.get('/1.php', {params :{action: 'new_dog', dogInfo: payload}}).then((response) => {
-        if (response.data.msg === 'ok') {
-          alert ('dog added');
-          context.dispatch('getOwnerDogs', context.state.user.id);
-        }
+      return new Promise ((resolve, reject) => {
+        axios.get('/1.php', {params :{action: 'new_dog', dogInfo: payload}}).then((response) => {
+          if (response.data.msg === 'ok') {
+            //alert ('dog added');
+            context.dispatch('getOwnerDogs', context.state.user.id).then(() => {
+              resolve()
+            });
+          } else {reject();}
+        });
       });
     },
 

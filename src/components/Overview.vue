@@ -60,7 +60,7 @@
                 <div class="passport-info-record">
                     <h2>Owner: <span class="record link-like" v-on:click="goToOwner">{{dogOwner ? dogOwner.name : ""}}</span></h2>
                     <div class="pushright">
-                        {{dogOwner ? dogOwner.country : ""}}, {{dogOwner ? dogOwner.city : ""}} <br>
+                        {{dogOwner.country ? dogOwner.country+', ' : ""}} {{dogOwner.city ? dogOwner.city : ""}} <br>
                         E-mail: {{dogOwner ? dogOwner.email : ""}} <br>
                         Phone: {{dogOwner ? dogOwner.phone : ""}}
                     </div>
@@ -262,10 +262,11 @@
 
     .page-nav-element {
         background-color: #aaaaaa;
-        border-left-style: solid;
-        height: 100%;
-        padding-left: 12px;
-        padding-right: 12px;
+        border-right-style: solid;
+        border-color: #333333;
+        height: 25px;
+        padding-left: 15px;
+        padding-right: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -280,7 +281,7 @@
         width: 100%;
         flex-direction: row;
         background-color: #333333;
-        height: 20px;
+        height: 25px;
     }
 
     .page-nav-element:hover {

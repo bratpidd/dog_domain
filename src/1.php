@@ -135,7 +135,7 @@ if ($_GET['action'] === 'new_dog') {
         $user_id = $user['id'];
         $dog = json_decode($_GET['dogInfo'], true);
         mysqli_query($con, "INSERT INTO dogs (`name`, `breed`, `sex`, `birthdate`, `color`, `tattoo`, `owner_id`) 
-VALUES ('".$dog['name']."', '".$dog['breed']."', '".$dog['sex']."', '".$dog['birthDate']."', '".$dog['color']."', '".$dog['tattoo']."', '".$user_id."')");
+VALUES ('".$dog['name']."', '".$dog['breed']."', '".$dog['sex']."', '".$dog['birthdate']."', '".$dog['color']."', '".$dog['tattoo']."', '".$user_id."')");
         $response ['msg'] = 'ok';
     } else {$response['msg'] = 'fail';}
     echo (json_encode($response));
@@ -176,18 +176,19 @@ if ($_GET['action'] === 'auth_request') {           //request to authorize user 
         $token = bin2hex(random_bytes(64));
         $google_id = $id_token_content['sub'];
         $userData = mysqli_fetch_assoc(mysqli_query($con,"select * from owners WHERE google_id = ".$google_id));
-        if (empty($userData)) {                                                                     //if noone found
+        if (empty($userData)) {                                                                     //if noone found - create a new owner and create a test dog for him
             $name = $id_token_content['name'];
             $email = $id_token_content['email'];
             mysqli_query($con, "
 INSERT INTO owners (`name`, `email`, `google_id`, `auth_token`) 
 VALUES ('".$name."', '".$email."', '".$google_id."', '".$token."')");
+            setcookie('auth_token', $token, time()+259200); //3 days
             $response['msg'] = 'new_user';
         } else {                                                                                    //if someone found
                 mysqli_query($con, "UPDATE owners SET auth_token = '".$token."' WHERE google_id = '".$google_id."'");
                 $response['msg'] = 'auth_token_updated';
+                setcookie('auth_token', $token, time()+259200); //3 days
         }
-        setcookie('auth_token', $token, time()+259200); //3 days
     } else {
         $response['msg'] = 'your google id token - invalid!';
     }
