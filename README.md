@@ -1,24 +1,12 @@
 # dog_domain
 
-## Project setup
-```
-npm install
-```
+## Сайт, где можно вести записи о своих питомцах
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Написан на Vue.js, серверная часть - PHP + MySQL.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+http://dogs.chukovskiy.beget.tech/
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Функционал:
+ - Регистрация пользователя (в настоящее время только через Google Auth)
+ - Регистрация питомца. Для новых пользователей автоматически генерируется собака для ускорения знакомства с сайтом
+ - Учет сроков приема медикаментов, вакцины и т.п.
