@@ -19,12 +19,13 @@
                             <div class="wannabe-h3">Color: </div><input autocomplete="nfgcv" v-model="dogInput.color"><br>
                             <div class="wannabe-h3">Tattoo: </div><input autocomplete="jjfds" v-model="dogInput.tattoo"><br>
                     </form>
-                    <button class="button-commit" v-on:click="commitNewDog" v-if="newDogAllowed">Create Profile</button>
-                    <button class="button-commit" v-on:click="commitUpdate" v-if="editAllowed">Save</button>
+
                 </div>
             </div>
             <div class="photo">PHOTO</div>
         </div>
+        <button class="button-commit" v-on:click="commitNewDog" v-if="newDogAllowed">Create Profile</button>
+        <button class="button-commit" v-on:click="commitUpdate" v-if="editAllowed">Save</button>
     </div>
 </template>
 
@@ -35,6 +36,11 @@
             this.$root.$on('new_dog_clicked',() => {
                 this.resetInputs();
             });
+            if (this.editAllowed) {
+                this.$store.dispatch('getDog', this.$route.params.dog_id).then(() => {
+                    this.dogInput = JSON.parse(JSON.stringify(this.$store.state.dogs[0]));
+                });
+            }
         },
         data () {
             return {
@@ -101,12 +107,7 @@
             //}
             //this.resetInputs();
 
-            if (this.editAllowed) {
-                this.$store.dispatch('getDog', this.$route.params.dog_id).then(() => {
-                    this.dogInput = JSON.parse(JSON.stringify(this.$store.state.dogs[0]));
-                });
-                //this.dogInput = JSON.parse(JSON.stringify(this.dogToEdit)); //since dogInput is all about v-models, it has to be a separate object to leave vuex store unmodified
-            }
+
         }
     }
 </script>
@@ -172,20 +173,6 @@
         background-color: brown;
     }
 
-    .passport-info {
-        margin: 50px;
-        line-height: 30px;
-
-        display: flex;
-        flex-direction: column;
-        width: 500px;
-    }
-
-    .passport-info-record {
-        position: relative;
-        padding-bottom: 50px;
-        width: 100%;
-    }
 
     .button-commit {
         height: 30px;
@@ -194,10 +181,18 @@
         padding-right: 8px;
         font-size: 20px;
         margin-top: 30px;
+        margin-left: 50px;
     }
 
-    .record {
-        color: brown;
+    @media screen and (max-width: 600px) {
+        .page {
+            flex-direction: column;
+        }
+
+        .photo {
+            margin-left: 50px;
+        }
+
     }
 
 </style>

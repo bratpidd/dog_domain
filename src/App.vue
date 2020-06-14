@@ -1,20 +1,43 @@
 <template>
   <div id="app">
     <div class="top-nav" v-if="loggedIn || $route.name !== 'home'">
-      <router-link to="/"><div class="nav-element" v-on:click="homeClicked">Home</div></router-link>
-      <router-link v-for="dog in this.$store.state.userDogs" :to="{ name: 'dog', params: {dog_id: dog.id, tab: $route.params.tab ? $route.params.tab: 'passport'}}" v-bind:key="dog.id"><div class="nav-element">{{dog.name}}</div></router-link>
-      <div class="push">
-        <router-link to="/NewDog"><div class="nav-element" v-on:click="addDogClicked" v-if="loggedIn">Add your dog!</div></router-link>
-      </div>
-      <router-link :to="{ path: userInfo.linkPath }" v-if="loggedIn"><div class="nav-element">{{userInfo.linkText}}</div></router-link>
+      <router-link to="/"><div class="nav-element left-el" v-on:click="homeClicked">Home</div></router-link>
 
-      <div class="nav-element" v-if="loggedIn" v-on:click="signOut">Log Out</div>
+      <div class="dropdown" v-on:click="dropdown.user = !dropdown.user" v-click-outside="hideUserDropdown" v-if="loggedIn" >
+        <div class="nav-element left-el">{{this.$store.state.user.name || ""}}▼</div>
+        <div class="dropdown-content" v-bind:class="{'display-flex' : dropdown.user}" >
+          <router-link :to="{ name: 'owner', params: {owner_id: this.$store.state.user.id}}">
+            <div class="nav-element dropdown-element">Profile</div>
+          </router-link>
+          <div class="nav-element dropdown-element" v-on:click="signOut">Log Out</div>
+        </div>
+      </div>
+
+      <div class="push"></div>
+
+      <div class="dropdown" v-on:click="dropdown.dogs = !dropdown.dogs" v-click-outside="hideDogsDropdown" v-if="loggedIn && this.$store.state.userDogs.length > 1" >
+        <div class="nav-element right-el">Your Dogs▼</div>
+        <div class="dropdown-content" v-bind:class="{'display-flex' : dropdown.dogs}" >
+          <router-link v-for="dog in this.$store.state.userDogs"
+                       :to="{ name: 'dog', params: {dog_id: dog.id, tab: $route.params.tab ? $route.params.tab: 'passport'}}"
+                       v-bind:key="dog.id">
+            <div class="nav-element dropdown-element">{{dog.name}}</div>
+          </router-link>
+        </div>
+      </div>
+
+      <router-link :to="{ name: 'dog', params: {dog_id: this.$store.state.userDogs[0].id, tab: $route.params.tab ? $route.params.tab: 'passport'}}" v-if="this.$store.state.userDogs.length === 1">
+        <div class="nav-element" v-if="loggedIn">{{this.$store.state.userDogs[0].name}}</div>
+      </router-link>
+
+      <router-link to="/NewDog"><div class="nav-element right-el" v-on:click="addDogClicked" v-if="loggedIn">Add your dog!</div></router-link>
+
+
 
       <div class="placeholder-wide">
           <div id="google-signin-btn" v-if="!loggedIn"></div>
       </div>
     </div>
-
     <div class="pagebox">
       <router-view></router-view>
     </div>
@@ -37,6 +60,12 @@ export default {
       },
       loggedIn: false,
       response: "",
+      windowWidth: 0,
+      userDataLoaded: false,
+      dropdown: {
+        user : false,
+        dogs: false,
+      },
     }
   },
   mounted() {
@@ -45,16 +74,16 @@ export default {
       this.renderGBtn('google-signin-btn');
     });
 
-    this.$store.dispatch('getUserInfo').then(() => {  //same as loadUserInfo but not loadUserInfo (to avoid something recursion-like)
-      this.loggedIn = true;
-      this.$root.$emit('user_data_loaded');
-      if (this.$route.name === 'home') {
-        //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
-      }
-      //
-      //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
-    //  this.renderGBtn();
-    }).catch(() => {})
+    //this.$store.dispatch('getUserInfo').then(() => {  //same as loadUserInfo but not loadUserInfo (to avoid something recursion-like)
+     // this.loggedIn = true;
+     // this.$root.$emit('user_data_loaded');
+    //}).catch(() => {})
+    this.loadUserInfo();
+    //document.addEventListener('click', this.close);
+    //this.$nextTick(() => {
+      //this.windowWidth = window.innerWidth;
+    //});
+
   },
   created() {
 
@@ -66,16 +95,16 @@ export default {
     selectedDog() {
       return this.$store.getters.selectedDog;
     },
-    userInfo() {
-      let linkText = "Sign In! (Google)";
-      let linkPath = '/sign_in';
-      let user = this.$store.state.user;
-      linkText = user.name;
-      linkPath = '/owner/' + user.id;
-      return {linkText, linkPath};
-    }
   },
   methods: {
+    // eslint-disable-next-line no-unused-vars
+    hideUserDropdown() {
+      this.dropdown.user = false;
+    },
+    hideDogsDropdown() {
+      this.dropdown.dogs = false;
+    },
+
     homeClicked() {
       //this.$root.$emit('home_clicked');   //this event does not reach the child
       if (!this.loggedIn) {
@@ -87,21 +116,28 @@ export default {
     },
 
     loadUserInfo () {
+      //alert('load user info');
+      this.userDataLoaded = false;
       return new Promise ((resolve, reject) => {
         this.$store.dispatch('getUserInfo').then(() => {
           this.loggedIn = true;
-          this.$root.$emit('user_data_loaded');       //
+          //this.$root.$emit('user_data_loaded');       //
+          this.userDataLoaded = true;  // the point is "there will be no further attempts to load user data"
           resolve();
           //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
           if (this.$route.name === 'home') {
             //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
           }
-        }).catch(() => {reject();})
+        }).catch(() => {
+          reject();
+          this.userDataLoaded = true;
+        });
       });
     },
 
     signOut() {
       this.loggedIn = false;
+      //this.dropdown.user = false;
       document.cookie = "auth_token=false; path=/";
 //      this.googleBtnRendered = false;
   //    if (this.googleBtnRendered) {
@@ -153,7 +189,7 @@ export default {
           });
         });
       } else {
-        this.loadUserInfo();
+        //this.loadUserInfo();
       }
     },
     onSignInFailure() {
@@ -208,7 +244,6 @@ export default {
 span[id^=not_signed_]{
   visibility: hidden;
 }
-
 span[id^=not_signed_]:before {
   content: 'Sign in';
   visibility: visible;
@@ -220,57 +255,49 @@ body, html {
 }
 
 .top-nav {
-  background-color: gray;
+  background-color: black;
   position:relative;
   height: 40px;
   width: calc(100%);
   max-width: 1000px;
-
-  margin-left: max((100% - 1000px)/2, 0.000000000000001px);
-  margin-right: max((100% - 1000px)/2, 0.0000000000000001%);
-  /*for some reason "0px" or "0%" translates to simple "0" and formula refuses to work
-  there are more accurate ways to do what I wanted but whatever*/
+  align-self: center;
   display: flex;
 }
-  .top-nav .nav-element {
-    background-color: black;
-    height: 100%;
-    padding-left: 12px;
-    padding-right: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-    border-right-style: solid;
-    border-width: 1px;
-    border-color: #333333
-  }
+.nav-element {
+  background-color: black;
+  height: 100%;
+  padding-left: 12px;
+  padding-right: 12px;
+  display: flex;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  border-width: 1px;
+  border-color: #000000
+}
 
-  .top-nav .placeholder-wide {
+.left-el {
+  border-right-style: solid;
+}
 
-    padding: 0;
-  }
+.right-el {
+  border-left-style: solid;
+}
 
-  .top-nav .placeholder-narrow {
-    width: 0;
-    padding: 0;
-  }
-
-  .nav-element:hover {
-    background-color: #444444;
-  }
-
-  .top-nav a {
-    display: block;
-    height: 100%;
-    text-decoration: none;
-  }
-
-  .push{
-    margin-left: auto;
-  }
-
+.top-nav .placeholder-wide {
+  padding: 0;
+}
+.nav-element:hover {
+  background-color: #444444;
+}
+.top-nav a {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+}
+.push{
+  margin-left: auto;
+}
 .pagebox {
   display: flex;
   flex: 1;
@@ -286,4 +313,103 @@ body, html {
   align-self: center;
 }
 
+
+.dropdown {
+  display: flex;
+  position: relative;
+}
+
+.dropdown-content {
+  display:none;
+  position: absolute;
+  z-index: 1;
+  margin-top: 40px;
+  flex-direction: column;
+  min-width: 100%;
+}
+
+.dropdown-element {
+  height: 40px;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-right-style: solid;
+}
+
+.display-flex {
+  display: flex;
+}
+
+.passport-info {
+  margin: 20px !important;
+  line-height: 30px;
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.passport-info-record {
+  position: relative;
+  padding-bottom: 50px !important;
+  width: 100%;
+}
+.record {
+  color: brown;
+}
+.button-commit {
+  display: inline;
+  height: 30px;
+  width: auto;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  font-size: 20px;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+.flex-space-between {
+  justify-content: space-between; /*justify-content = main axis*/
+}
+
+@media screen and (max-width: 600px) {
+  .lowres-column {
+    flex-direction: column !important;
+  }
+  .lowres-row {
+    flex-direction: row !important;
+  }
+  .lowres-column-reverse {
+    flex-direction: column-reverse !important;
+  }
+  .passport-info-record {
+    padding-bottom: 15px !important;
+  }
+  .button-commit {
+    font-size: 17px;
+  }
+  .widescreen-only {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 600px) {
+
+}
+
+
+.link-like {
+  cursor: pointer;
+  text-decoration: underline;
+  color: darkblue;
+  font-weight: bold;
+}
 </style>

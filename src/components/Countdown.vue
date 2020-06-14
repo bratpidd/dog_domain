@@ -4,14 +4,13 @@
             <div class="text-up">{{title}}</div>
             <div class="text-up push">{{isNoData ? '' : brand}}</div>
         </div>
-        <div>
-            <canvas v-bind:id="canvasId" v-bind:width="stripWidth*2" v-bind:height="stripHeight*2" class="canvas-style" ref="canvas"></canvas>
+        <div >
+            <canvas v-bind:id="canvasId" v-bind:width="stripWidth*2" v-bind:height="stripHeight*2" class="canvas-style"></canvas>
         </div>
         <div class="flex-row">
             <div class="text-down">{{isNoData ? '' : date}}</div>
             <div class="text-down push">{{isNoData ? '' : 'Expire'+((daysLeft &lt; 0) ? 'd: ' : 's: ')+expires}}</div>   <!--this awesome &lt; is because Lint is against '<' -->
         </div>
-
     </div>
 </template>
 
@@ -28,14 +27,25 @@
           return {
               stripHeight: 42,
               stripWidth: 500,
-              realWidth: 0
+              realWidth: 0,
+              canvasEl: '',
           }
         },
+
+        created() {
+            window.addEventListener("resize", this.resizeHandler);
+        },
+        destroyed() {
+            window.removeEventListener("resize", this.resizeHandler);
+        },
+
         mounted() {
-            //this.$root.on('HealthCanvasRedraw')
-            this.canvasDraw();
+            //this.getCanvasDOM();
+            //this.canvasDraw();
+            this.resizeHandler();
         },
         computed: {
+
             isNoData() {
                 return (this.date === 0 && this.duration === 0 && this.brand === 0);        //however there it gets all HTML parameters as a numbers -_-
             },
@@ -57,6 +67,20 @@
         },
         methods: {
 
+            resizeHandler() {
+                this.getCanvasDOM();
+                this.$nextTick(() => {
+                    let newWidth = this.canvasEl.clientWidth;
+                    if (this.stripWidth !== newWidth) {
+                        this.stripWidth = this.canvasEl.clientWidth;
+                        this.canvasDraw();
+                    }
+                });
+            },
+
+            getCanvasDOM() {
+                this.canvasEl = document.getElementById(this.canvasId);
+            },
 
             canvasDraw() {
                 this.$nextTick(() => {
@@ -75,7 +99,7 @@
                         r = ("0" + r).slice(-2);
                         let b = "33";
                         canvas.fillStyle = "#"+r+g+b;
-                        canvas.translate(0.5, 0.5);
+                        //canvas.translate(0.5, 0.5);
                         canvas.fillRect((width-2)*(1-percentage),2,(width-2)*percentage,strip-2);
                         canvas.strokeRect(1,1,width-2,height-2);
                         canvas.fillStyle = "#000000";
@@ -85,7 +109,9 @@
                         if (this.isNoData) {
                             timeLeftMsg = 'NO DATA';
                         }
-                        canvas.fillText(timeLeftMsg, width*2/5, height*2/3);
+                        canvas.textBaseline = 'middle';
+                        canvas.textAlign = "center";
+                        canvas.fillText(timeLeftMsg, width/2, height/2);
                     }
                 });
             }
@@ -113,21 +139,20 @@
         font-size: 13px;
     }
 
-    .flex-row {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-    }
-
-    .flex-column {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 70px;
-    }
-
     .canvas-style {
         display: inline-block;
         width: 100%;
         image-rendering: crisp-edges;
+    }
+
+    @media screen and (max-width: 600px) {
+        .text-up {
+            font-size: 17px;
+        }
+
+        .text-down {
+            font-size: 12px;
+        }
+
     }
 </style>

@@ -25,9 +25,33 @@ import ownerEdit from './components/OwnerEdit.vue';
 import home from './components/Home.vue';
 
 Vue.config.productionTip = false;
-// state declaration:
+
+
+Vue.directive('click-outside', {
+  // eslint-disable-next-line no-unused-vars
+  bind: function (el, binding, vnode) {
+
+    const handler = (e) => {
+      if ((!el.contains(e.target) && el !== e.target)) {
+        binding.value(e)
+      }
+    };
+    el.clickOutsideEvent = handler;
+    document.addEventListener('click', handler)
+  },
+
+  // eslint-disable-next-line no-unused-vars
+  unbind: function (el, binding) {
+    // Remove Event Listeners
+    document.removeEventListener('click', el.clickOutsideEvent);
+    el.clickOutsideEvent = null;
+  }
+});
+
+
 // owner - any registered human
 // user - verified owner that uses the website right now
+
 const store = new Vuex.Store({
   state: {
     response: "",
@@ -221,11 +245,7 @@ const store = new Vuex.Store({
               }
             });
             resolve();
-          }
-          if (msg === 'no_cookie') {
-            context.dispatch('authRequest');
-            reject();
-          }
+          } else{reject();}
         });
       });
     },
@@ -265,9 +285,9 @@ const routes = [
   { path: '/hw', component: helloWorld, props: {msg: 'HELOL'} },
   { path: '/foo', component: Foo },
   { path: '/', name: 'home', component: home},
+  { path: '/dog/:dog_id/edit', name: 'dog_edit', component: newDog},
   { path: '/dog/:dog_id/:tab', name: 'dog', component: overview},
   { path: '/NewDog', name: 'dog_new', component: newDog},
-  { path: '/dog/:dog_id/edit', name: 'dog_edit', component: newDog},
   { path: '/owner/:owner_id', name: 'owner', component: owner},
   { path: '/edit_profile', name: 'owner_edit', component: ownerEdit },
 ];

@@ -6,69 +6,85 @@
         <div class="nav-container">
             <div class="page-nav-element" v-bind:class="{ 'nav-selected' : selectedView.passport }" v-on:click="passportClick">Passport</div>
             <div class="page-nav-element" v-bind:class="{ 'nav-selected' : selectedView.health }" v-on:click="healthClick">Health</div>
-            <div class="page-nav-element">Something Else</div>
+            <div class="page-nav-element" v-if="false">Something Else</div>
         </div>
-        <div class="page" v-if="dogToView">
+        <div class="page" v-if="dataLoaded && this.$parent.userDataLoaded">
+
             <div class="passport-info" v-if=selectedView.health>
-                <div class="passport-info-record">
-                    <h1>Health</h1>
-                </div>
-                <div class="flex-column" v-if="healthLoaded">
-                    <div class="flex-row">
-                        <countdown title="Flea and tick"
-                                   v-bind:date="healthInfo[0] ? healthInfo[0].date : 0"
-                                   v-bind:duration="healthInfo[0] ? healthInfo[0].duration : 0"
-                                   v-bind:brand="healthInfo[0] ? healthInfo[0].brand : 0">
-                        </countdown>
-                        <button class="button-commit button-update" v-on:click="showHealthDialog(1)" v-if="showEditButton">Update</button>
+                <div class="flex-row flex-space-between">
+                    <div class="flex-column" >
+                        <div class="passport-info-record">
+                            <h1>Health</h1>
+                        </div>
+                        <div class="flex-column" v-if="healthLoaded" style="max-width: 600px;">
+                            <div class="flex-row passport-info-record">
+                                <countdown title="Flea and tick"
+                                           v-bind:date="healthInfo[0] ? healthInfo[0].date : 0"
+                                           v-bind:duration="healthInfo[0] ? healthInfo[0].duration : 0"
+                                           v-bind:brand="healthInfo[0] ? healthInfo[0].brand : 0">
+                                </countdown>
+                                <div class="button-update-container">
+                                    <button class="button-commit button-update" v-on:click="showHealthDialog(1)" v-if="showEditButton">Update</button>
+                                </div>
+                            </div>
+                            <div class="flex-row passport-info-record">
+                                <countdown title="Intestinal parasites"
+                                           v-bind:date="healthInfo[1] ? healthInfo[1].date : 0"
+                                           v-bind:duration="healthInfo[1] ? healthInfo[1].duration : 0"
+                                           v-bind:brand="healthInfo[1] ? healthInfo[1].brand : 0">
+                                </countdown>
+                                <div class="button-update-container">
+                                    <button class="button-commit button-update" v-on:click="showHealthDialog(2)" v-if="showEditButton">Update</button>
+                                </div>
+                            </div>
+                            <div class="flex-row passport-info-record">
+                                <countdown title="Vaccination"
+                                           v-bind:date="healthInfo[2] ? healthInfo[2].date : 0"
+                                           v-bind:duration="healthInfo[2] ? healthInfo[2].duration : 0"
+                                           v-bind:brand="healthInfo[2] ? healthInfo[2].brand : 0">
+                                </countdown>
+                                <div class="button-update-container">
+                                    <button class="button-commit button-update" v-on:click="showHealthDialog(3)" v-if="showEditButton">Update</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex-row">
-                        <countdown title="Intestinal parasites"
-                                   v-bind:date="healthInfo[1] ? healthInfo[1].date : 0"
-                                   v-bind:duration="healthInfo[1] ? healthInfo[1].duration : 0"
-                                   v-bind:brand="healthInfo[1] ? healthInfo[1].brand : 0">
-                        </countdown>
-                        <button class="button-commit button-update" v-on:click="showHealthDialog(2)" v-if="showEditButton">Update</button>
-                    </div>
-                    <div class="flex-row">
-                        <countdown title="Vaccination"
-                                   v-bind:date="healthInfo[2] ? healthInfo[2].date : 0"
-                                   v-bind:duration="healthInfo[2] ? healthInfo[2].duration : 0"
-                                   v-bind:brand="healthInfo[2] ? healthInfo[2].brand : 0">
-                        </countdown>
-                        <button class="button-commit button-update" v-on:click="showHealthDialog(3)" v-if="showEditButton">Update</button>
-                    </div>
+                    <div class="photo widescreen-only">PHOTO</div>
                 </div>
             </div>
 
             <div class="passport-info" v-if=selectedView.passport>
-                <div class="passport-info-record">
-                    <h1 v-if="false">{{dogToView ? dogToView.name : ""}}</h1>
-                    <h1>{{dogToView ? dogToView.breed : ""}}</h1>
-                    <h2>{{dogToView ? dogToView.sex : ""}}</h2>
-                </div>
-                <div class="passport-info-record">
-                    <h2>Age: <span class="record">{{dogToView ? dogAge : ""}}</span></h2>
-                    <div class="pushright">Birth Date: {{dogToView ? dogToView.birthdate : ""}}</div>
-                </div>
-                <div class="passport-info-record">
-                    <h2>Color: <span class="record">{{dogToView ? dogToView.color : ""}}</span></h2>
-                </div>
-                <div class="passport-info-record">
-                    <h2>Tattoo: <span class="record">{{dogToView ? dogToView.tattoo : ""}}</span></h2>
-                </div>
-                <div class="passport-info-record">
-                    <h2>Owner: <span class="record link-like" v-on:click="goToOwner">{{dogOwner ? dogOwner.name : ""}}</span></h2>
-                    <div class="pushright">
-                        {{dogOwner.country ? dogOwner.country+', ' : ""}} {{dogOwner.city ? dogOwner.city : ""}} <br>
-                        E-mail: {{dogOwner ? dogOwner.email : ""}} <br>
-                        Phone: {{dogOwner ? dogOwner.phone : ""}}
+                <div class="flex-row lowres-column-reverse">
+                    <div class="flex-column">
+                        <div class="passport-info-record">
+                            <h1 v-if="false">{{dogToView ? dogToView.name : ""}}</h1>
+                            <h1>{{dogToView ? dogToView.breed : ""}}</h1>
+                            <h2>{{dogToView ? dogToView.sex : ""}}</h2>
+                        </div>
+                        <div class="passport-info-record">
+                            <h2>Age: <span class="record">{{dogToView ? dogAge : ""}}</span></h2>
+                            <div class="pushright">Birth Date: {{dogToView ? dogToView.birthdate : ""}}</div>
+                        </div>
+                        <div class="passport-info-record">
+                            <h2>Color: <span class="record">{{dogToView ? dogToView.color : ""}}</span></h2>
+                        </div>
+                        <div class="passport-info-record">
+                            <h2>Tattoo: <span class="record">{{dogToView ? dogToView.tattoo : ""}}</span></h2>
+                        </div>
+                        <div class="passport-info-record">
+                            <h2>Owner: <span class="record link-like" v-on:click="goToOwner">{{dogOwner ? dogOwner.name : ""}}</span></h2>
+                            <div class="pushright">
+                                {{dogOwner.country ? dogOwner.country+', ' : ""}} {{dogOwner.city ? dogOwner.city : ""}} <br v-if="dogOwner.country || dogOwner.city">
+                                {{(dogOwner && false) ? "E-mail: " + dogOwner.email : ""}} <br v-if="dogOwner.phone">
+                                {{(dogOwner.phone && false) ? "Phone: " + dogOwner.phone : ""}}
+                            </div>
+                            <button class="button-commit" v-on:click="goToEdit" v-if="showEditButton">Edit</button>
+                        </div>
                     </div>
-                    <button class="button-commit" v-on:click="goToEdit" v-if="showEditButton">Edit</button>
+                    <div class="photo">PHOTO</div>
                 </div>
-
             </div>
-            <div class="photo">PHOTO</div>
+
         </div>
     </div>
 </template>
@@ -86,11 +102,16 @@
             return {
                 healthInfo: [],
                 healthLoaded: false,
+                dataLoaded: false,
                 }
         },
         mounted() {
             this.$root.$on('medicationUpdated', () => {
                 this.loadCurrentTabData(true);
+            });
+
+            this.$root.$on ('user_data_loaded', () => {
+
             });
 
         },
@@ -120,14 +141,19 @@
                 let delta = new Date (new Date() - new Date(this.dogToView.birthdate)); //delta in milliseconds
                 let years = delta.getFullYear()-1970;
                 let months = delta.getMonth();
-                return years + ' years, ' + months + ' months';
+                let yearsText = (years !== 0) ? years + ' years, ' : '';
+                let result = yearsText + months + ' months';
+                return result;
             },
             dogOwner() {
                 let ownerId = this.dogToView ? this.dogToView.owner_id : "";
                 return this.$store.getters.ownerById(ownerId);
             },
             showEditButton() {
-                return this.dogToView ? this.dogToView.owner_id === this.$store.state.user.id : false;
+               // let logic = (this.dataLoaded && this.$store.state.dogs.length !== 0 && this.$store.state.owners.length !== 0);
+                //alert('dataloaded:'+ String(this.$parent.userDataLoaded)+' dogs length: '+String(this.$store.state.dogs.length)+' own length:'+ String(this.$store.state.owners.length) +' compar: ' +String(this.$store.state.user.id));
+                //alert ('fsafsfsdfsdf');
+                return (this.$parent.userDataLoaded) ? this.dogToView.owner_id === this.$store.state.user.id : false;
                 //return true;
             },
 
@@ -171,9 +197,12 @@
                 this.$router.push({name: 'owner', params: {owner_id: this.dogToView.owner_id}})
             },
             reloadData() {
+                this.dataLoaded = false;
                 this.$store.commit('wipeData'); //wipes all but user-related data
                 let dog_id = this.$route.params.dog_id;
-                this.$store.dispatch('getDog', dog_id);
+                this.$store.dispatch('getDog', dog_id).then(() => {
+                    this.dataLoaded = true;
+                });
             },
             healthClick() {
                 if (!this.selectedView.health) {
@@ -205,49 +234,6 @@
         color: black;
     }
 
-    .canvas {
-        height: 210px;
-        width: 300px;
-    }
-
-    .flex-row {
-        display: flex;
-    flex-direction: row
-    }
-
-    .flex-column {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .padding-5{
-        padding: 5px;
-    }
-
-    .margin-5{
-        margin: 5px;
-    }
-
-    .text-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .med-info {
-        display: flex;
-        height: 40px;
-        width: 130px;
-        margin-top: 15px;
-        margin-bottom: 15px;
-        margin-left: 8px;
-    }
-
-    .date-field {
-        height: 20px;
-        font-size: 12px;
-    }
-
     .pagename {
         background-color: #333333;
         display:flex;
@@ -264,7 +250,7 @@
         background-color: #aaaaaa;
         border-right-style: solid;
         border-color: #333333;
-        height: 25px;
+        height: 35px;
         padding-left: 15px;
         padding-right: 15px;
         display: flex;
@@ -281,22 +267,13 @@
         width: 100%;
         flex-direction: row;
         background-color: #333333;
-        height: 25px;
+        height: 35px;
     }
 
-    .page-nav-element:hover {
+    .page-nav-element:hover, .nav-selected {
         background-color: #D3D3D3;
     }
 
-    .nav-selected {
-        background-color: #d3d3d3 !important;
-    }
-
-    .push-last {
-        margin-right: 0%;
-    }
-
-    .push-first {margin-left: auto}
 
     .page {
         display: flex;
@@ -320,47 +297,31 @@
 
     .photo {
         width: 200px;
-        height: 300px;
+        height: 150px;
         background-color: brown;
-    }
-
-    .passport-info {
-        margin: 50px;
-        line-height: 30px;
-        display: flex;
-        flex-direction: column;
-        width: 600px;
-    }
-
-    .passport-info-record {
-        position: relative;
-        padding-bottom: 50px;
-        width: 100%;
-    }
-
-    .record {
-        color: brown;
+        margin-left: 20px;
+        margin-bottom: 20px;
     }
 
     .pushright{margin-left: 30px;}
 
-    .button-commit {
-        display: inline;
-        height: 30px;
-        width: auto;
-        padding-left: 8px;
-        padding-right: 8px;
-        font-size: 20px;
-        margin-top: 30px;
-    }
 
     .button-update {
-        margin-top: 20px;
-        margin-left: 50px;
+        height: 100%;
     }
 
-    .link-like {
-        cursor: pointer;
-        text-decoration: underline;
+    .button-update-container {
+        margin-left: 15px;
+        margin-top: 30px;
+        margin-bottom: 40px;
     }
+
+    @media screen and (max-width: 600px) {
+        .photo {
+            margin-left: 0px;
+            margin-right: auto;
+        }
+
+    }
+
 </style>

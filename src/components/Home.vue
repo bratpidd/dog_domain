@@ -6,6 +6,7 @@
         <div class="sign-in" v-if="!$parent.loggedIn">
             <div id="google-signin-btn-home" class="g-button"></div>
         </div>
+        <div class="sign-in"></div>
 
     </div>
 </template>
@@ -34,16 +35,21 @@
     .main-frame {
         padding-top: 15%;
         text-align: center;
-        width: 100%;
+        width: 80%;
         color: black;
+        height: 100%;
+        align-self: center;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
 
     .sign-in {
-        margin-top: 40%;
         display: flex;
         flex-direction: row;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
+        flex: 1;
     }
 
     .g-button {

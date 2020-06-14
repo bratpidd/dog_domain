@@ -9,11 +9,11 @@
                     <h3>{{ownerLoaded ? ownerToView.country : ""}}</h3>
                     <h3>{{ownerLoaded ? ownerToView.city : ""}}</h3>
                 </div>
-                <div class="passport-info-record">
-                    <h2 v-if="ownerInfoExists.email">E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
+                <div class="passport-info-record" v-if="false">
+                    <h2 v-if="ownerInfoExists.email && false">E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
                 </div>
                 <div class="passport-info-record">
-                    <h2 v-if="ownerInfoExists.phone">Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
+                    <h2 v-if="ownerInfoExists.phone && false">Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
                     <button class="button-commit" v-on:click="goToEditOwner" v-if="showEditButton">Edit</button>
                 </div>
 
@@ -22,9 +22,9 @@
                     <div class="pushright">
                         <table class="dogs-table">
                             <tr v-for="dog in ownerDogs" v-bind:key="dog.id">
-                                <td class="link-like" v-on:click="goToDog(dog.id)">
+                                <router-link :to="{ name: 'dog', params: {dog_id: dog.id, tab: 'passport'}}"><td class="link-like">
                                     {{dog.name}}
-                                </td>
+                                    </td></router-link>
                                 <td>
                                     {{dog.breed}}
                                 </td>
@@ -171,43 +171,8 @@
         background-color: brown;
     }
 
-    .passport-info {
-        margin: 0px;
-        line-height: 30px;
-        display: flex;
-        flex-direction: column;
-        width: 800px;
-    }
-
-    .passport-info-record {
-        position: relative;
-        width: 100%;
-        margin-left: 50px;
-        margin-top: 50px;
-    }
-
-    .record {
-        color: brown;
-    }
-
     .pushright{margin-left: 30px;}
 
-    .button-commit {
-        display: inline;
-        height: 30px;
-        width: auto;
-        padding-left: 8px;
-        padding-right: 8px;
-        font-size: 20px;
-        margin-top: 30px;
-    }
-
-    .link-like {
-        cursor: pointer;
-        text-decoration: underline;
-        color: darkblue;
-        font-weight: bold;
-    }
 
     .dogs-table, tr, td {
         padding-right: 80px;

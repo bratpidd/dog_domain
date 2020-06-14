@@ -22,6 +22,8 @@ if ($_GET['action'] === 'get_owner_info') {
     $owner = mysqli_fetch_assoc(mysqli_query($con,"select id, name, country, city, email, phone from owners WHERE id = '".$owner_id."'"));
     if (isset ($owner)) {
         $response['msg'] = 'ok';}
+    $owner['email'] = ''; //quick patch for secure reasons
+    $owner['phone'] = '';//-/-
     $response['dogs'] = $dogs;
     $response['owner'] = $owner;
     echo (json_encode($response));
