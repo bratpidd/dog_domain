@@ -69,35 +69,17 @@ export default {
     }
   },
   mounted() {
-    //this.renderGBtn('google-signin-btn');
     window.addEventListener("google-loaded", () => {
       this.renderGBtn('google-signin-btn');
     });
-
-    //this.$store.dispatch('getUserInfo').then(() => {  //same as loadUserInfo but not loadUserInfo (to avoid something recursion-like)
-     // this.loggedIn = true;
-     // this.$root.$emit('user_data_loaded');
-    //}).catch(() => {})
     this.loadUserInfo();
-    //document.addEventListener('click', this.close);
-    //this.$nextTick(() => {
-      //this.windowWidth = window.innerWidth;
-    //});
-
   },
   created() {
 
   },
   computed: {
-    str_a() {
-      return this.$store.state.count;
-    },
-    selectedDog() {
-      return this.$store.getters.selectedDog;
-    },
   },
   methods: {
-    // eslint-disable-next-line no-unused-vars
     hideUserDropdown() {
       this.dropdown.user = false;
     },
@@ -121,13 +103,8 @@ export default {
       return new Promise ((resolve, reject) => {
         this.$store.dispatch('getUserInfo').then(() => {
           this.loggedIn = true;
-          //this.$root.$emit('user_data_loaded');       //
-          this.userDataLoaded = true;  // the point is "there will be no further attempts to load user data"
+          this.userDataLoaded = true;  // no further attempts to load user data
           resolve();
-          //this.$store.dispatch('getOwnerDogs', this.$store.state.user.id); //no need
-          if (this.$route.name === 'home') {
-            //this.$router.push({name: 'owner', params: {owner_id: this.$store.state.user.id}})
-          }
         }).catch(() => {
           reject();
           this.userDataLoaded = true;
@@ -137,10 +114,8 @@ export default {
 
     signOut() {
       this.loggedIn = false;
-      //this.dropdown.user = false;
+      this.dropdown.user = false;
       document.cookie = "auth_token=false; path=/";
-//      this.googleBtnRendered = false;
-  //    if (this.googleBtnRendered) {
       // eslint-disable-next-line no-undef
         let auth2 = gapi.auth2.getAuthInstance();
         auth2.signOut().then(() => {
@@ -151,9 +126,8 @@ export default {
             this.renderGBtn('google-signin-btn');
           }
         });
-    //  } else {this.renderGBtn();}
     },
-    onSignIn() {  //could be "user" inside
+    onSignIn() {
       if (!this.loggedIn) {
         this.$store.dispatch('authRequest').then((msg) => {
           this.loadUserInfo().then(() => {
@@ -189,7 +163,6 @@ export default {
           });
         });
       } else {
-        //this.loadUserInfo();
       }
     },
     onSignInFailure() {
@@ -205,7 +178,7 @@ export default {
         scope: 'email',
         prompt: 'select_account',
       });
-      this.googleBtnRendered = true;
+      this.googleBtnRendered = true; //this is nedeed... probably
     },
     authRequest() {
       this.$store.dispatch('authRequest');
@@ -263,6 +236,7 @@ body, html {
   align-self: center;
   display: flex;
 }
+
 .nav-element {
   background-color: black;
   height: 100%;
@@ -342,10 +316,13 @@ body, html {
 .passport-info {
   margin: 20px !important;
   line-height: 30px;
-
   display: flex;
   flex-direction: column;
   width: 100%;
+  color: black;
+  text-align: left;
+  justify-content: space-between;
+
 }
 .passport-info-record {
   position: relative;
@@ -366,12 +343,10 @@ body, html {
 .flex-row {
   display: flex;
   flex-direction: row;
-  flex: 1;
 }
 .flex-column {
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 .flex-row-reverse {
   flex-direction: row-reverse;
@@ -380,7 +355,84 @@ body, html {
   justify-content: space-between; /*justify-content = main axis*/
 }
 
+.photo {
+  max-width: 300px;
+  min-height: 50px;
+  background-color: #aaa;
+  margin-left: 20px;
+  margin-bottom: 20px;
+  align-self: flex-start;
+  line-height: 0;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.photo-placeholder {
+  display: flex;
+  border-style: dashed;
+  margin: 10px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.overview {
+  display: flex;
+  flex-direction: column;
+  padding:0px;
+  margin-top: 0px;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  align-items: flex-start;
+}
+
+.pagename {
+  background-color: #333333;
+  display:flex;
+  height: 60px;
+  text-align: left;
+  width: 100%;
+  color: white;
+  align-items: center;
+}
+
+.page {
+  display: flex;
+  width: 100%;
+  color: black;
+  text-align: left;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.page-title {
+  margin-left: 15px;
+}
+
+.image-photo {
+  max-width: 100%;
+
+  background-color: brown;
+  line-height: 40px;
+  align-self: flex-end;
+}
+
+.no-photo {
+  min-height: 160px;
+  min-width: 160px;
+}
+
+
 @media screen and (max-width: 600px) {
+  .lowres-hidden {
+    display: none !important;
+  }
+  .lowres-shown {
+    display: flex !important;
+  }
   .lowres-column {
     flex-direction: column !important;
   }
@@ -396,8 +448,9 @@ body, html {
   .button-commit {
     font-size: 17px;
   }
-  .widescreen-only {
-    display: none;
+  .photo {
+    margin-left: 0px;
+    margin-right: auto;
   }
 }
 

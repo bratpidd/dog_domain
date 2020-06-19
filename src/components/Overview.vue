@@ -1,7 +1,9 @@
 <template>
     <div class="overview">
-        <div class="pagename"><h1>{{dogToView ? dogToView.name : ""}}</h1>
-
+        <div class="pagename">
+            <div class="page-title">
+                <h1>{{dogToView ? dogToView.name : ""}}</h1>
+            </div>
         </div>
         <div class="nav-container">
             <div class="page-nav-element" v-bind:class="{ 'nav-selected' : selectedView.passport }" v-on:click="passportClick">Passport</div>
@@ -49,12 +51,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="photo widescreen-only">PHOTO</div>
+                    <div class="photo lowres-hidden" v-if="false">PHOTO</div>
                 </div>
             </div>
 
             <div class="passport-info" v-if=selectedView.passport>
-                <div class="flex-row lowres-column-reverse">
+                <div class="flex-row flex-space-between lowres-column-reverse">
                     <div class="flex-column">
                         <div class="passport-info-record">
                             <h1 v-if="false">{{dogToView ? dogToView.name : ""}}</h1>
@@ -81,18 +83,18 @@
                             <button class="button-commit" v-on:click="goToEdit" v-if="showEditButton">Edit</button>
                         </div>
                     </div>
-                    <div class="photo">PHOTO</div>
+                    <div class="photo" v-bind:class="{'no-photo': dogToView.imgUrl === ''}">
+                        <img class="image-photo" id="image-photo" :src="dogToView.imgUrl">
+                        <div class="photo-placeholder" v-if="dogToView.imgUrl === ''">No photo</div>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </template>
 
 <script>
     import Countdown from "./Countdown";
-    // eslint-disable-next-line no-unused-vars
-    import Foo from "./Foo";
     import HealthDialog from "./HealthDialog";
 
     export default {
@@ -150,15 +152,12 @@
                 return this.$store.getters.ownerById(ownerId);
             },
             showEditButton() {
-               // let logic = (this.dataLoaded && this.$store.state.dogs.length !== 0 && this.$store.state.owners.length !== 0);
-                //alert('dataloaded:'+ String(this.$parent.userDataLoaded)+' dogs length: '+String(this.$store.state.dogs.length)+' own length:'+ String(this.$store.state.owners.length) +' compar: ' +String(this.$store.state.user.id));
-                //alert ('fsafsfsdfsdf');
                 return (this.$parent.userDataLoaded) ? this.dogToView.owner_id === this.$store.state.user.id : false;
-                //return true;
             },
 
         },
         methods: {
+
             loadCurrentTabData(wipe = true) {
                 let dog_id = this.$route.params.dog_id;
                 switch (this.$route.params.tab) {
@@ -203,6 +202,8 @@
                 this.$store.dispatch('getDog', dog_id).then(() => {
                     this.dataLoaded = true;
                 });
+
+
             },
             healthClick() {
                 if (!this.selectedView.health) {
@@ -220,11 +221,6 @@
 
 <style scoped>
 
-    * {
-        margin: 0;
-        padding:0;
-    }
-
     h1, h2 {
         margin-bottom: 5px;
         margin-top: 5px;
@@ -232,18 +228,6 @@
 
     body {
         color: black;
-    }
-
-    .pagename {
-        background-color: #333333;
-        display:flex;
-        height: 60px;
-        padding-left: 0px;
-        text-align: left;
-        width: 100%;
-        color: white;
-        align-items: center;
-        flex-direction: row;
     }
 
     .page-nav-element {
@@ -274,37 +258,7 @@
         background-color: #D3D3D3;
     }
 
-
-    .page {
-        display: flex;
-        width: 100%;
-        color: black;
-        text-align: left;
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .overview {
-        display: flex;
-        flex-direction: column;
-        padding:0px;
-        margin-top: 0px;
-        height: 100%;
-        width: 100%;
-        position: relative;
-        align-items: flex-start;
-    }
-
-    .photo {
-        width: 200px;
-        height: 150px;
-        background-color: brown;
-        margin-left: 20px;
-        margin-bottom: 20px;
-    }
-
     .pushright{margin-left: 30px;}
-
 
     .button-update {
         height: 100%;
@@ -317,10 +271,7 @@
     }
 
     @media screen and (max-width: 600px) {
-        .photo {
-            margin-left: 0px;
-            margin-right: auto;
-        }
+
 
     }
 

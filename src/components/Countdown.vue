@@ -40,8 +40,6 @@
         },
 
         mounted() {
-            //this.getCanvasDOM();
-            //this.canvasDraw();
             this.resizeHandler();
         },
         computed: {
@@ -61,7 +59,6 @@
             daysLeft() {
                 let delta = new Date (new Date(this.date) - new Date()); //delta in milliseconds
                 let days = Math.round(delta/24/3600000 + Number(this.duration));
-                //if (days<0) {days=0;}
                 return days;
             },
         },
@@ -99,7 +96,7 @@
                         r = ("0" + r).slice(-2);
                         let b = "33";
                         canvas.fillStyle = "#"+r+g+b;
-                        //canvas.translate(0.5, 0.5);
+                        //canvas.translate(0.5, 0.5); // <-- this creates a mess while resizing
                         canvas.fillRect((width-2)*(1-percentage),2,(width-2)*percentage,strip-2);
                         canvas.strokeRect(1,1,width-2,height-2);
                         canvas.fillStyle = "#000000";

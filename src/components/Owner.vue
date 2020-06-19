@@ -2,42 +2,48 @@
     <div class="overview">
         <div class="pagename"><h2>{{whoseProfile}}</h2></div>
         <div class="page">
-            <div class="passport-info"  v-if="!ownerFound"><h1>Oops!<br><br>Noone lives here :(</h1></div>
-            <div class="passport-info"  v-if="ownerFound">
-                <div class="passport-info-record">
-                    <h1>{{ownerLoaded ? ownerToView.name : ""}}</h1>
-                    <h3>{{ownerLoaded ? ownerToView.country : ""}}</h3>
-                    <h3>{{ownerLoaded ? ownerToView.city : ""}}</h3>
-                </div>
-                <div class="passport-info-record" v-if="false">
-                    <h2 v-if="ownerInfoExists.email && false">E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
-                </div>
-                <div class="passport-info-record">
-                    <h2 v-if="ownerInfoExists.phone && false">Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
-                    <button class="button-commit" v-on:click="goToEditOwner" v-if="showEditButton">Edit</button>
-                </div>
-
-                <div class="passport-info-record">
-                    <h2>Dogs: <span class="record">{{ownerLoaded ? "" : ""}}</span></h2>
-                    <div class="pushright">
-                        <table class="dogs-table">
-                            <tr v-for="dog in ownerDogs" v-bind:key="dog.id">
-                                <router-link :to="{ name: 'dog', params: {dog_id: dog.id, tab: 'passport'}}"><td class="link-like">
-                                    {{dog.name}}
-                                    </td></router-link>
-                                <td>
-                                    {{dog.breed}}
-                                </td>
-                                <td>
-                                    {{dog.sex}}
-                                </td>
-                            </tr>
-                        </table>
+            <div class="passport-info">
+            <div class="flex-row flex-space-between lowres-column-reverse">
+                <div v-if="!ownerFound"><h1>Oops!<br><br>Noone lives here :(</h1></div>
+                <div class="flex-column" v-if="ownerFound">
+                    <div class="passport-info-record">
+                        <h1>{{ownerLoaded ? ownerToView.name : ""}}</h1>
+                        <h3>{{ownerLoaded ? ownerToView.country : ""}}</h3>
+                        <h3>{{ownerLoaded ? ownerToView.city : ""}}</h3>
+                    </div>
+                    <div class="passport-info-record" v-if="false">
+                        <h2 v-if="ownerInfoExists.email && false">E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
+                    </div>
+                    <div class="passport-info-record">
+                        <h2 v-if="ownerInfoExists.phone && false">Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
+                        <button class="button-commit" v-on:click="goToEditOwner" v-if="showEditButton">Edit</button>
                     </div>
 
+                    <div class="passport-info-record">
+                        <h2>Dogs: <span class="record">{{ownerLoaded ? "" : ""}}</span></h2>
+                        <div class="">
+                            <table class="dogs-table">
+                                <tr v-for="dog in ownerDogs" v-bind:key="dog.id">
+                                    <router-link :to="{ name: 'dog', params: {dog_id: dog.id, tab: 'passport'}}"><td class="link-like">
+                                        {{dog.name}}
+                                        </td></router-link>
+                                    <td>
+                                        {{dog.breed}}
+                                    </td>
+                                    <td>
+                                        {{dog.sex}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="photo" v-bind:class="{'no-photo': true}" v-if="false">
+                    <img class="image-photo" id="image-photo">
+                    <div class="photo-placeholder" v-if="true">No photo</div>
                 </div>
             </div>
-            <div class="photo">PHOTO</div>
+        </div>
         </div>
     </div>
 </template>
@@ -76,9 +82,6 @@
 
             ownerToView() {
                 let ownerId = this.$route.params.owner_id;
-                //if (ownerId === this.$store.state.user.id) {
-                  //  return this.$store.state.user;
-                //}
                 let owner = this.$store.getters.ownerById(ownerId);
                 this.validateOwnerInfo(owner);
                 if (owner == null) {
@@ -86,12 +89,6 @@
                 }
                 return owner;
             },
-         /*   dogAge() {
-                let delta = new Date (new Date() - new Date(this.dogToView.birthDate)); //delta in milliseconds
-                let years = delta.getFullYear()-1970;
-                let months = delta.getMonth();
-                return years + ' years, ' + months + ' months';
-            },*/
 
             showEditButton() {
                 return this.$route.params.owner_id === this.$store.state.user.id;
@@ -110,19 +107,11 @@
             goToEditOwner() {
                 this.$router.push({name: 'owner_edit'});
             },
-            goToDog(id) {
-                this.$router.push({name: 'dog', params: {dog_id: id, tab: 'passport'}})
-            }
         }
     }
 </script>
 
 <style scoped>
-
-    * {
-        margin: 0;
-        padding:0;
-    }
 
     h1, h2 {
         margin-bottom: 5px;
@@ -133,49 +122,14 @@
         color: black;
     }
 
-    .pagename {
-        background-color: #333333;
-        display:flex;
-        height: 60px;
-        padding-left: 0px;
-        text-align: left;
-        width: 100%;
-        color: white;
-        align-items: center;
-    }
-
-    .page {
-        display: flex;
-        width: 100%;
-        color: black;
-        text-align: left;
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .overview {
-        display: flex;
-        flex-direction: column;
-        padding:0px;
-        margin-top: 0px;
-        height: 100%;
-        width: 100%;
-        position: relative;
-        align-items: flex-start;
-    }
-
-    .photo {
-        width: 200px;
-        min-width: 200px;
-        height: 300px;
-        background-color: brown;
-    }
-
-    .pushright{margin-left: 30px;}
-
-
     .dogs-table, tr, td {
-        padding-right: 80px;
+        padding-right: 20px;
         font-size: 19px;
+    }
+
+    @media screen and (max-width: 600px) {
+        .dogs-table, tr, td {
+            font-size: 17px;
+        }
     }
 </style>

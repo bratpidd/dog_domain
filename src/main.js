@@ -128,8 +128,9 @@ const store = new Vuex.Store({
       return new Promise ((resolve, reject) => {
         // eslint-disable-next-line no-undef
         let GoogleAuth = gapi.auth2.getAuthInstance();
-        let googleUser = GoogleAuth.currentUser.get();
-        googleUser.reloadAuthResponse().then(()=>{
+
+        GoogleAuth.then(()=>{
+          let googleUser = GoogleAuth.currentUser.get();
           let idToken = googleUser.getAuthResponse().id_token;
           axios.get('/1.php', {params: {action: 'auth_request', id_token: idToken}}).then((response) => {
             //alert (response.data.msg);
@@ -139,6 +140,17 @@ const store = new Vuex.Store({
             } else {reject();}
           });
         })
+      });
+    },
+
+    uploadImage(context, payload) {    //request to upload image for 'owner' or 'dog' (specified in 'entity')
+      return new Promise((resolve, reject) => {
+        axios.post('/1.php', payload.image, {headers: {'ACTION' : 'upload_image', 'ENTITY' : payload.entity, 'ID': payload.id}}).then((response => {
+          if (response.statusText === 'OK') {
+            resolve();
+            //alert ('resolved');
+          } else {reject()}
+        }));
       });
     },
 
@@ -254,9 +266,11 @@ const store = new Vuex.Store({
       return new Promise ((resolve, reject) => {
         axios.get('/1.php', {params :{action: 'new_dog', dogInfo: payload}}).then((response) => {
           if (response.data.msg === 'ok') {
+            let dogId = response.data.dog_id;
+            //alert(dogId);
             //alert ('dog added');
             context.dispatch('getOwnerDogs', context.state.user.id).then(() => {
-              resolve()
+              resolve(dogId);
             });
           } else {reject();}
         });
@@ -268,6 +282,7 @@ const store = new Vuex.Store({
         axios.get('/1.php', {params: {action: 'get_dog', dogId: id}}).then((response) =>{
           if (response.data.msg === 'ok') {
             let dog = response.data.dog;
+            dog.imgUrl = response.data.photo_url;
             let owner = response.data.owner;
             //alert(JSON.stringify(dog));
             context.commit('dogPush', dog);

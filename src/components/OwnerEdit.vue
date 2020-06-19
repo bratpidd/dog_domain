@@ -16,7 +16,7 @@
                     <button class="button-commit" v-on:click="commitUpdate">Save</button>
                 </div>
             </div>
-            <div class="photo">PHOTO</div>
+            <div class="photo" v-if="false">PHOTO</div>
         </div>
     </div>
 </template>
@@ -56,7 +56,6 @@
             },
         },
         created: function() {
-            //if (this.editAllowed) {
             this.ownerInput = JSON.parse(JSON.stringify(this.$store.state.user));
         },
         mounted() {

@@ -15,11 +15,6 @@
     export default {
         name: "Home",
         mounted() {
-            //this.$root.$on ('home_clicked',() => {
-              //  this.$parent.renderGBtn('google-signin-btn-home');
-               // alert ('hk');
-            //});
-            //this.$parent.renderGBtn('google-signin-btn-home');
             if (this.$parent.gbtnHomeRenderRequest) {
                 this.$parent.renderGBtn('google-signin-btn-home');
                 this.$parent.gbtnHomeRenderRequest = false;

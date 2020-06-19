@@ -1,7 +1,8 @@
 <?php
 include "db_access.php";
 $response = array();
-                                                //VALUES ('".."','".."','".."','".."','".."','".."')  <--- PRICELESS VALUES EXPRESSION
+
+                                               //VALUES ('".."','".."','".."','".."','".."','".."')  <--- PRICELESS VALUES EXPRESSION
 function getCurrentUser(){                     //returns assoc array with "user" on successful authentication or NULL if cookie is outdated/does not match
     global $con;
     if (!isset($_COOKIE['auth_token'])) {return null;} //TODO when logging in from a different machine/browser - this check returns bullshit instead of authentication
@@ -11,6 +12,53 @@ function getCurrentUser(){                     //returns assoc array with "user"
     return $user;
 }
 
+function checkUserOwnership ($dog_id) {
+    $user = getCurrentUser();
+    $user_id = $user['id'];
+    $dog = mysqli_fetch_assoc(mysqli_query($con, "SELECT * FROM dogs WHERE id = ".$dog_id));
+    return $dog['owner_id'] === $user_id;
+}
+
+$headers = apache_request_headers();
+
+if ($headers['ACTION'] === 'upload_image') {
+    $id = $headers['ID'];
+    $entity = $headers['ENTITY'];
+    $data = file_get_contents('php://input');
+    if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) { //handling base64 data
+        $data = substr($data, strpos($data, ',') + 1);
+        $type = strtolower($type[1]); // jpg, png, gif
+        if (!in_array($type, [ 'jpg', 'jpeg', 'gif', 'png' ])) {
+            $msg = 'invalid image type';
+        }
+        $data = base64_decode($data);
+        if ($data === false) {
+            $msg = 'base64_decode failed';
+        }
+    } else {
+        $msg = 'did not match data URI with image data';
+    }
+
+    if (!is_dir('photos')) {
+        mkdir('photos');
+    }
+
+    if (!is_dir('photos/'.$entity)) {
+        mkdir('photos/'.$entity);
+    }
+    $user = getCurrentUser();
+    $upload_allowed = false;
+    if ($entity === 'owner' && $user['id'] === $id) {
+        $upload_allowed = true;
+    }
+
+    if ($entity === 'dog') {
+        $upload_allowed = checkUserOwnership($id);      //if the dog belongs to the requester
+    }
+    $filename = 'photos/'.$entity.'/'.$id.'.'.$type;
+    //unlink($filename);
+    file_put_contents($filename, $data);    // eg /photos/dog/4.png
+}
 
 if ($_GET['action'] === 'get_owner_info') {
     $owner_id = $_GET['ownerId'];
@@ -115,6 +163,8 @@ if ($_GET['action'] === 'get_dog') {
         $response['msg'] = 'ok';
         $response['dog'] = $dog;
         $response['owner'] = $owner;
+        $photo_url = 'photos/dog/'.$dog_id.'.png';
+        $response['photo_url'] = file_exists($photo_url) ? '/'.$photo_url.'?'.intval(microtime(true) * 1000) : '';
     } else $response['msg'] = 'not_found';
     echo json_encode($response);
 }
@@ -138,6 +188,8 @@ if ($_GET['action'] === 'new_dog') {
         $dog = json_decode($_GET['dogInfo'], true);
         mysqli_query($con, "INSERT INTO dogs (`name`, `breed`, `sex`, `birthdate`, `color`, `tattoo`, `owner_id`) 
 VALUES ('".$dog['name']."', '".$dog['breed']."', '".$dog['sex']."', '".$dog['birthdate']."', '".$dog['color']."', '".$dog['tattoo']."', '".$user_id."')");
+        $dog_id = mysqli_fetch_assoc(mysqli_query($con, "SELECT LAST_INSERT_ID();"))['LAST_INSERT_ID()'];
+        $response['dog_id'] = $dog_id;
         $response ['msg'] = 'ok';
     } else {$response['msg'] = 'fail';}
     echo (json_encode($response));
