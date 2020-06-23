@@ -29,7 +29,9 @@
         },
         created() {
             let date = new Date();
-            this.date = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, 0) + '-' + date.getDate().toString().padStart(2, 0); //formatting for HTML input-date
+            this.date = date.getFullYear().toString() + '-'
+                + (date.getMonth() + 1).toString().padStart(2, 0) + '-'
+                + date.getDate().toString().padStart(2, 0); //formatting for HTML input-date
             this.brand = this.oldBrand; //pre-filling previously used brand because it will likely match with a new one
             this.duration = this.oldDuration;
 
@@ -47,16 +49,13 @@
         methods: {
             submitHandle() {
                 let objectToPass = {
-                    code: this.code,
+                    code: String(this.code),
                     duration: this.duration,
                     date: this.date,
                     brand: this.brand,
                     dogId: this.dogId
                 };
                 this.$store.dispatch('updateMedication', objectToPass).then(() => {
-                    this.$store.dispatch('getMedicationInfo').then(() => {
-                        this.$root.$emit('medicationUpdated');
-                    })
                 });
                 this.$emit('close');
             },

@@ -1,54 +1,54 @@
 <template>
   <div id="app">
-    <div class="top-nav" v-if="loggedIn || $route.name !== 'home'">
-      <router-link to="/"><div class="nav-element left-el" v-on:click="homeClicked">Home</div></router-link>
-
-      <div class="dropdown" v-on:click="dropdown.user = !dropdown.user" v-click-outside="hideUserDropdown" v-if="loggedIn" >
-        <div class="nav-element left-el">{{this.$store.state.user.name || ""}}▼</div>
-        <div class="dropdown-content" v-bind:class="{'display-flex' : dropdown.user}" >
-          <router-link :to="{ name: 'owner', params: {owner_id: this.$store.state.user.id}}">
-            <div class="nav-element dropdown-element">Profile</div>
-          </router-link>
-          <div class="nav-element dropdown-element" v-on:click="signOut">Log Out</div>
-        </div>
+    <div class="top-nav" v-if="isLoggedIn || $route.name !== 'home'">
+      <div class="block-left">
+        <router-link to="/"><div class="nav-element" v-on:click="homeClicked">Home</div></router-link>
+        <dropdown v-if="isLoggedIn" :title="`${this.$store.state.user.name}▼`">
+          <div class="dropdown-content">
+            <router-link :to="{ name: 'owner', params: {owner_id: this.$store.state.user.id}}">
+              <div class="nav-element dropdown-element">Profile</div>
+            </router-link>
+            <div class="nav-element dropdown-element" v-on:click="signOut">Log Out</div>
+          </div>
+        </dropdown>
       </div>
 
-      <div class="push"></div>
+      <div class="block-right">
+        <dropdown v-if="isLoggedIn && this.$store.state.userDogs.length > 1" :title="'Your Dogs▼'">
+          <div class="dropdown-content">
+            <router-link v-for="dog in this.$store.state.userDogs"
+                         :to="{ name: dogRouteName, params: {dog_id: dog.id}}"
+                         v-bind:key="dog.id">
+              <div class="nav-element dropdown-element">{{dog.name}}</div>
+            </router-link>
+          </div>
+        </dropdown>
 
-      <div class="dropdown" v-on:click="dropdown.dogs = !dropdown.dogs" v-click-outside="hideDogsDropdown" v-if="loggedIn && this.$store.state.userDogs.length > 1" >
-        <div class="nav-element right-el">Your Dogs▼</div>
-        <div class="dropdown-content" v-bind:class="{'display-flex' : dropdown.dogs}" >
-          <router-link v-for="dog in this.$store.state.userDogs"
-                       :to="{ name: 'dog', params: {dog_id: dog.id, tab: $route.params.tab ? $route.params.tab: 'passport'}}"
-                       v-bind:key="dog.id">
-            <div class="nav-element dropdown-element">{{dog.name}}</div>
-          </router-link>
+        <router-link :to="{ name: dogRouteName, params: {dog_id: this.$store.state.userDogs[0].id}}" v-if="this.$store.state.userDogs.length === 1">
+          <div class="nav-element" v-if="isLoggedIn">{{this.$store.state.userDogs[0].name}}</div>
+        </router-link>
+
+        <router-link to="/NewDog"><div class="nav-element right-el" v-on:click="addDogClicked" v-if="isLoggedIn">Add your dog!</div></router-link>
+
+        <div class="placeholder-wide">
+            <div id="google-signin-btn" v-if="!isLoggedIn"></div>
         </div>
-      </div>
-
-      <router-link :to="{ name: 'dog', params: {dog_id: this.$store.state.userDogs[0].id, tab: $route.params.tab ? $route.params.tab: 'passport'}}" v-if="this.$store.state.userDogs.length === 1">
-        <div class="nav-element" v-if="loggedIn">{{this.$store.state.userDogs[0].name}}</div>
-      </router-link>
-
-      <router-link to="/NewDog"><div class="nav-element right-el" v-on:click="addDogClicked" v-if="loggedIn">Add your dog!</div></router-link>
-
-
-
-      <div class="placeholder-wide">
-          <div id="google-signin-btn" v-if="!loggedIn"></div>
       </div>
     </div>
     <div class="pagebox">
-      <router-view></router-view>
+      <router-view v-if="userDataLoaded"></router-view>
     </div>
   </div>
 
 </template>
 
 <script>
-
+  import Dropdown from './components/Dropdown';
 export default {
+
+
   name: 'app',
+  components: {Dropdown},
   data() {
     return {
       gbtnHomeRenderRequest: false,
@@ -58,14 +58,10 @@ export default {
         ID: "",
         tokenId: "",
       },
-      loggedIn: false,
+      isLoggedIn: false,
       response: "",
       windowWidth: 0,
       userDataLoaded: false,
-      dropdown: {
-        user : false,
-        dogs: false,
-      },
     }
   },
   mounted() {
@@ -78,18 +74,18 @@ export default {
 
   },
   computed: {
+    dogRouteName() {
+      switch (this.$route.name) {
+        case 'dog_passport': return 'dog_passport';
+        case 'dog_health': return 'dog_health';
+        default: return 'dog_passport';
+      }
+    }
   },
   methods: {
-    hideUserDropdown() {
-      this.dropdown.user = false;
-    },
-    hideDogsDropdown() {
-      this.dropdown.dogs = false;
-    },
-
     homeClicked() {
       //this.$root.$emit('home_clicked');   //this event does not reach the child
-      if (!this.loggedIn) {
+      if (!this.isLoggedIn) {
         this.gbtnHomeRenderRequest = true;
       }
     },
@@ -102,7 +98,7 @@ export default {
       this.userDataLoaded = false;
       return new Promise ((resolve, reject) => {
         this.$store.dispatch('getUserInfo').then(() => {
-          this.loggedIn = true;
+          this.isLoggedIn = true;
           this.userDataLoaded = true;  // no further attempts to load user data
           resolve();
         }).catch(() => {
@@ -113,7 +109,7 @@ export default {
     },
 
     signOut() {
-      this.loggedIn = false;
+      this.isLoggedIn = false;
       this.dropdown.user = false;
       document.cookie = "auth_token=false; path=/";
       // eslint-disable-next-line no-undef
@@ -128,7 +124,7 @@ export default {
         });
     },
     onSignIn() {
-      if (!this.loggedIn) {
+      if (!this.isLoggedIn) {
         this.$store.dispatch('authRequest').then((msg) => {
           this.loadUserInfo().then(() => {
             if (msg === 'new_user') {     //this section generates a dog for any newcomer to boost user expirience
@@ -138,21 +134,21 @@ export default {
                 sex: "Male",
                 birthdate: '2016-04-12',
                 color: "Black, Brown",
-                tattoo: "TEST" + this.$store.state.user.id
+                tattoo: `TEST${this.$store.state.user.id}`
               };
               this.$store.dispatch('newDog', dog).then(() => {
                 let medInfo1 = {
                   code: 1,
                   duration: 84,
                   date: '2020-05-22',
-                  brand: 'Test medication #' + this.$store.state.user.id,
+                  brand: `Test medication #${this.$store.state.user.id}`,
                   dogId: this.$store.state.dogs[0].id
                 };
                 let medInfo3 = {
                   code: 3,
                   duration: 365,
                   date: '2018-03-13',
-                  brand: 'Test vaccine #' + this.$store.state.user.id,
+                  brand: `Test vaccine #${this.$store.state.user.id}`,
                   dogId: this.$store.state.userDogs[0].id
                 };
                 this.$store.dispatch('updateMedication', medInfo1);
@@ -162,11 +158,10 @@ export default {
             }
           });
         });
-      } else {
       }
     },
     onSignInFailure() {
-     // this.loggedIn = false;
+     // this.isLoggedIn = false;
     },
     renderGBtn(buttonId) {
       // eslint-disable-next-line no-undef
@@ -174,7 +169,7 @@ export default {
         onsuccess: this.onSignIn,
         onfailure: this.onSignInFailure,
         height: 40,
-        width: buttonId === 'google-signin-btn-home' ? 110 : 110,
+        width: 110,
         scope: 'email',
         prompt: 'select_account',
       });
@@ -210,10 +205,6 @@ export default {
   min-height: 100% !important;
 }
 
-.text-black {
-  color: black;
-}
-
 span[id^=not_signed_]{
   visibility: hidden;
 }
@@ -235,6 +226,7 @@ body, html {
   max-width: 1000px;
   align-self: center;
   display: flex;
+  justify-content: space-between;
 }
 
 .nav-element {
@@ -250,15 +242,8 @@ body, html {
   border-color: #000000
 }
 
-.left-el {
-  border-right-style: solid;
-}
 
-.right-el {
-  border-left-style: solid;
-}
-
-.top-nav .placeholder-wide {
+.placeholder-wide {
   padding: 0;
 }
 .nav-element:hover {
@@ -268,9 +253,6 @@ body, html {
   display: block;
   height: 100%;
   text-decoration: none;
-}
-.push{
-  margin-left: auto;
 }
 .pagebox {
   display: flex;
@@ -294,7 +276,6 @@ body, html {
 }
 
 .dropdown-content {
-  display:none;
   position: absolute;
   z-index: 1;
   margin-top: 40px;
@@ -304,9 +285,6 @@ body, html {
 
 .dropdown-element {
   height: 40px;
-  border-bottom-style: solid;
-  border-left-style: solid;
-  border-right-style: solid;
 }
 
 .display-flex {
@@ -425,7 +403,6 @@ body, html {
   min-width: 160px;
 }
 
-
 @media screen and (max-width: 600px) {
   .lowres-hidden {
     display: none !important;
@@ -458,11 +435,14 @@ body, html {
 
 }
 
-
 .link-like {
   cursor: pointer;
   text-decoration: underline;
   color: darkblue;
   font-weight: bold;
 }
+  .block-left, .block-right {
+    display: flex;
+    height: 100%;
+  }
 </style>

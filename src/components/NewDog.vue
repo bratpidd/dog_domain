@@ -175,7 +175,7 @@
                     this.$store.dispatch('getUserInfo');
                     if (this.editAllowed) {
                         //this.$store.commit('dogUpdate', objectToPass);
-                        this.$router.push({name: 'dog', params: {dog_id: redirectIndex, tab: 'passport'}})
+                        this.$router.push({path: `/dog/${redirectIndex}/passport`})
                     }
                 });
             },

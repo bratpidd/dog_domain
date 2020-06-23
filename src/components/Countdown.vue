@@ -1,14 +1,14 @@
 <template>
     <div class="flex-column">
         <div class="flex-row">
-            <div class="text-up">{{title}}</div>
-            <div class="text-up push">{{isNoData ? '' : brand}}</div>
+            <div class="text-up">{{getTitle}}</div>
+            <div class="text-up push">{{isNoData ? '' : data.brand}}</div>
         </div>
-        <div >
+        <div>
             <canvas v-bind:id="canvasId" v-bind:width="stripWidth*2" v-bind:height="stripHeight*2" class="canvas-style"></canvas>
         </div>
         <div class="flex-row">
-            <div class="text-down">{{isNoData ? '' : date}}</div>
+            <div class="text-down">{{isNoData ? '' : data.date}}</div>
             <div class="text-down push">{{isNoData ? '' : 'Expire'+((daysLeft &lt; 0) ? 'd: ' : 's: ')+expires}}</div>   <!--this awesome &lt; is because Lint is against '<' -->
         </div>
     </div>
@@ -18,10 +18,11 @@
     export default {
         name: "Countdown",
         props: {
-            date: String,
-            duration: String,      //it refuses to get HTML parameter as a number
-            title: String,
-            brand: String
+           // date: String,
+           // duration: String,      //it refuses to get HTML parameter as a number
+          //  title: String,
+          //  brand: String,
+            data: {},
         },
         data() {
           return {
@@ -30,6 +31,11 @@
               realWidth: 0,
               canvasEl: '',
           }
+        },
+        watch: {
+            data() {
+                this.canvasDraw();
+            },
         },
 
         created() {
@@ -45,25 +51,39 @@
         computed: {
 
             isNoData() {
-                return (this.date === 0 && this.duration === 0 && this.brand === 0);        //however there it gets all HTML parameters as a numbers -_-
+                return (!this.data.date || !this.data.duration);
             },
 
             canvasId() {
-                return "canvas"+this.title;
+                return this.data?.code || 'kuk';
             },
             expires() {
-                let date2 = new Date (this.date);
-                date2.setDate(date2.getDate()+Number(this.duration));
-                return date2.toISOString().substring(0, 10);
+                if (!this.isNoData) {
+                    let date2 = new Date (this.data.date);
+                    date2.setDate(date2.getDate()+Number(this.data.duration));
+                    return date2.toISOString().substring(0, 10);
+                } else {return 0;}
             },
             daysLeft() {
-                let delta = new Date (new Date(this.date) - new Date()); //delta in milliseconds
-                let days = Math.round(delta/24/3600000 + Number(this.duration));
+                let delta = new Date (new Date(this.data?.date) - new Date()); //delta in milliseconds
+                let days = Math.round(delta/24/3600000 + Number(this.data?.duration));
                 return days;
             },
+            getTitle() {
+                switch (this.data?.code) {
+                    case '1':
+                        return 'Flea and Tick';
+                    case '2':
+                        return 'Intestinal parasites';
+                    case '3':
+                        return 'Vaccination';
+                    default:
+                        return ''
+                }
+            },
         },
-        methods: {
 
+        methods: {
             resizeHandler() {
                 this.getCanvasDOM();
                 this.$nextTick(() => {
@@ -87,7 +107,7 @@
                         let width = this.stripWidth*2;
                         let height = this.stripHeight*2;
                         let strip = this.stripHeight*2-2; //strip fill height
-                        let percentage = (days+1)/(Number(this.duration)+1);
+                        let percentage = (days+1)/(Number(this.data?.duration)+1);
                         if (days === 0) {percentage = 0;}
                         let canvas = canvasElement.getContext("2d");
                         let r = Math.round(40+120*(1-percentage)).toString(16);
@@ -102,7 +122,9 @@
                         canvas.fillStyle = "#000000";
                         canvas.font="40px arial";
                         let letterS = Math.abs(this.daysLeft) === 1 ? '' : 's';
-                        let timeLeftMsg = (days === 0) ? 'EXPIRED ' + -this.daysLeft + ' day'+letterS+' ago' : String(this.daysLeft)+' day'+letterS+' left'; //'1 days left' still possible TODO
+                        let timeLeftMsg = (days === 0)
+                            ? `EXPIRED ${-this.daysLeft} day${letterS} ago`
+                            : `${String(this.daysLeft)} day${letterS} left`;
                         if (this.isNoData) {
                             timeLeftMsg = 'NO DATA';
                         }

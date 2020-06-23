@@ -3,7 +3,7 @@
         <h1>Welcome to dog domain!</h1>
         <h2>Here you can maintain a tiny database about your dogs.</h2>
         <h2>Some handy medication tracking is also included!</h2>
-        <div class="sign-in" v-if="!$parent.loggedIn">
+        <div class="sign-in" v-if="!$parent.isLoggedIn">
             <div id="google-signin-btn-home" class="g-button"></div>
         </div>
         <div class="sign-in"></div>

@@ -5,26 +5,22 @@
             <div class="passport-info">
             <div class="flex-row flex-space-between lowres-column-reverse">
                 <div v-if="!ownerFound"><h1>Oops!<br><br>Noone lives here :(</h1></div>
-                <div class="flex-column" v-if="ownerFound">
+                <div class="flex-column" v-if="ownerLoaded">
                     <div class="passport-info-record">
-                        <h1>{{ownerLoaded ? ownerToView.name : ""}}</h1>
-                        <h3>{{ownerLoaded ? ownerToView.country : ""}}</h3>
-                        <h3>{{ownerLoaded ? ownerToView.city : ""}}</h3>
-                    </div>
-                    <div class="passport-info-record" v-if="false">
-                        <h2 v-if="ownerInfoExists.email && false">E-mail: <span class="record">{{ownerLoaded ? ownerToView.email : ""}}</span></h2>
+                        <h1>{{ownerToView.name}}</h1>
+                        <h3>{{ownerToView.country}}</h3>
+                        <h3>{{ownerToView.city}}</h3>
                     </div>
                     <div class="passport-info-record">
-                        <h2 v-if="ownerInfoExists.phone && false">Phone: <span class="record">{{ownerLoaded ? ownerToView.phone : ""}}</span></h2>
                         <button class="button-commit" v-on:click="goToEditOwner" v-if="showEditButton">Edit</button>
                     </div>
 
-                    <div class="passport-info-record">
-                        <h2>Dogs: <span class="record">{{ownerLoaded ? "" : ""}}</span></h2>
-                        <div class="">
+                    <div class="passport-info-record" >
+                        <h2>Dogs: </h2>
+                        <div>
                             <table class="dogs-table">
                                 <tr v-for="dog in ownerDogs" v-bind:key="dog.id">
-                                    <router-link :to="{ name: 'dog', params: {dog_id: dog.id, tab: 'passport'}}"><td class="link-like">
+                                    <router-link :to="{ name: 'dog_passport', params: {dog_id: dog.id}}"><td class="link-like">
                                         {{dog.name}}
                                         </td></router-link>
                                     <td>
@@ -37,10 +33,6 @@
                             </table>
                         </div>
                     </div>
-                </div>
-                <div class="photo" v-bind:class="{'no-photo': true}" v-if="false">
-                    <img class="image-photo" id="image-photo">
-                    <div class="photo-placeholder" v-if="true">No photo</div>
                 </div>
             </div>
         </div>
