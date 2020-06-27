@@ -16,11 +16,12 @@ Vue.use(VModal, { dynamic: true, dynamicDefaults: { clickToClose: false, height:
 import App from './App.vue';
 import routes from './router/routes';
 import storeOptions from './store/store';
+//import store from './store/store';
 import "./directives/directives";
 
 Vue.config.productionTip = false;
 
-const store = new Vuex.Store(storeOptions);
+export const store = new Vuex.Store(storeOptions);
 const router = new VueRouter({
   routes, // short for `routes: routes`
   mode: 'history'

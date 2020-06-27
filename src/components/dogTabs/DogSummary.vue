@@ -38,16 +38,16 @@
         name: "DogSummary",
         data() {
             return {
-                isDataLoaded: false,
+                isDataLoaded: true,
             }
         },
         watch: {
             '$route.params.dog_id': function () { //if switched to another dog all data will be reloaded
-                this.reloadData();
+         //       this.reloadData();
             }
         },
         created() {
-            this.reloadData();
+            //this.reloadData();
         },
         computed: {
             dogToView() {
@@ -78,7 +78,7 @@
             },
             reloadData() {
                 this.isDataLoaded = false;
-                this.$store.commit('wipeData'); //wipes all but user-related data
+                //this.$store.commit('wipeData'); //wipes all but user-related data
                 let dog_id = this.$route.params.dog_id;
                 this.$store.dispatch('getDog', dog_id).then(() => {
                     this.isDataLoaded = true;

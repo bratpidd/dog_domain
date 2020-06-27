@@ -54,7 +54,7 @@
             }
         },
         created() {
-            this.$store.commit('wipeData');
+            //this.$store.commit('wipeData');
             this.$store.dispatch('getOwnerInfo', this.$route.params.owner_id).then(()=> {
                 this.ownerLoaded = true;
             }).catch(()=>{

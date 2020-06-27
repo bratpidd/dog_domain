@@ -157,7 +157,9 @@
                             entity: 'dog',
                             id: dogId
                         };
-                        this.$store.dispatch('uploadImage', imgPayload);
+                        this.$store.dispatch('uploadImage', imgPayload).then(() => {
+                            this.$router.push({name: 'dog_passport', params: {dog_id: dogId}});
+                        });
                     });
                 }
             },
@@ -171,12 +173,11 @@
                         entity: 'dog',
                         id: this.dogInput.id
                     };
-                    this.$store.dispatch('uploadImage', imgPayload);
-                    this.$store.dispatch('getUserInfo');
-                    if (this.editAllowed) {
-                        //this.$store.commit('dogUpdate', objectToPass);
-                        this.$router.push({path: `/dog/${redirectIndex}/passport`})
-                    }
+                    this.$store.dispatch('uploadImage', imgPayload).then (() => {
+                        this.$store.dispatch('getUserInfo').then(() => {
+                            this.$router.push({path: `/dog/${redirectIndex}/passport`})
+                        });
+                    });
                 });
             },
 

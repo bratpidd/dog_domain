@@ -53,12 +53,12 @@
             loadData() {
                 this.healthLoaded = false;
                 let dog_id = this.$route.params.dog_id;
-                this.$store.commit('wipeData'); //wipes all but user-related data
-                this.$store.dispatch('getDog', dog_id).then(() => {
+                //this.$store.commit('wipeData'); //wipes all but user-related data
+                //this.$store.dispatch('getDog', dog_id).then(() => {
                     this.$store.dispatch('getMedicationInfo', dog_id).then(() => {
                         this.healthLoaded = true;
                     });
-                });
+                //});
             },
             showHealthDialog(code) {
                 const medRecord = this.getMedicationByCode(code);

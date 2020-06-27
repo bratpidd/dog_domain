@@ -48,9 +48,9 @@
                 if (this.editAllowed) {
                     //this.$store.commit('ownerUpdate', objectToPass);
                     this.$store.dispatch('updateUser', objectToPass).then(() => {
-                        this.$store.dispatch('getUserInfo').then(() => {
-                            this.$router.push({name: 'owner', params: {owner_id: redirectIndex}})
-                        })
+                        //this.$store.dispatch('getUserInfo').then(() => {
+                        this.$router.push({name: 'owner', params: {owner_id: redirectIndex}})
+                        //})
                     });
                 }
             },

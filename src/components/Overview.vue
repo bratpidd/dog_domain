@@ -6,8 +6,12 @@
             </div>
         </div>
         <div class="nav-container">
-            <div class="page-nav-element" v-bind:class="{ 'nav-selected' : selectedView.passport }" v-on:click="passportClick">Passport</div>
-            <div class="page-nav-element" v-bind:class="{ 'nav-selected' : selectedView.health }" v-on:click="healthClick">Health</div>
+            <router-link :to="{name: 'dog_passport', params: {dog_id: $route.params.dog_id}}" class="router-link">
+                <div class="page-nav-element">Passport</div>
+            </router-link>
+            <router-link :to="{name: 'dog_health', params: {dog_id: $route.params.dog_id}}" class="router-link">
+                <div class="page-nav-element">Health</div>
+            </router-link>
             <div class="page-nav-element" v-if="false">Something Else</div>
         </div>
         <div class="page">
@@ -17,28 +21,26 @@
 </template>
 
 <script>
+    import {store} from '../main';
     export default {
         name: "overview",
+        beforeRouteEnter(to, from, next) {
+            store.dispatch('getDog', to.params.dog_id).then(() => {
+                next();
+            });
+        },
+
+        beforeRouteUpdate (to, from, next) {
+            this.$store.dispatch('getDog', to.params.dog_id).then(() => {
+                next();
+            })
+        },
+
         computed: {
-            selectedView() {
-                return {health: this.$route.name === 'dog_health', passport: this.$route.name === 'dog_passport'}
-            },
             dogToView() {
                 return this.$store.state.dogs[0];
             },
         },
-        methods: {
-            healthClick() {
-                if (!this.selectedView.health) {
-                    this.$router.push({path: `/dog/${this.dogToView.id}/health`});
-                }
-            },
-            passportClick() {
-                if (!this.selectedView.passport) {
-                    this.$router.push({path: `/dog/${this.dogToView.id}/passport`});
-                }
-            },
-        }
     }
 </script>
 
@@ -50,7 +52,6 @@
     }
 
     .page-nav-element {
-        background-color: #aaaaaa;
         border-right-style: solid;
         border-color: #333333;
         height: 35px;
@@ -63,6 +64,14 @@
         cursor: pointer;
         align-self: center;
         margin-top: auto;
+        text-decoration: none;
+    }
+    .page-nav-element:hover, .router-link-active{
+        background-color: #D3D3D3 !important;
+    }
+
+    .router-link {
+        background-color: #aaaaaa;
     }
 
     .nav-container {
@@ -72,10 +81,10 @@
         background-color: #333333;
         height: 35px;
     }
-
-    .page-nav-element:hover, .nav-selected {
-        background-color: #D3D3D3;
+    .nav-container a {
+        text-decoration: none;
     }
+
 
 
 </style>
