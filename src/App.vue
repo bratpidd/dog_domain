@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="top-nav" v-if="isLoggedIn || $route.name !== 'home'">
+    <div class="top-nav">
       <div class="block-left">
         <router-link to="/"><div class="nav-element" v-on:click="homeClicked">Home</div></router-link>
         <dropdown v-if="isLoggedIn" :title="`${this.$store.state.user.name}▼`">
@@ -31,7 +31,7 @@
         <router-link to="/NewDog"><div class="nav-element right-el" v-on:click="addDogClicked" v-if="isLoggedIn">Add your dog!</div></router-link>
 
         <div class="placeholder-wide">
-            <div id="google-signin-btn" v-if="!isLoggedIn"></div>
+            <div id="google-signin-btn"></div>
         </div>
       </div>
     </div>
@@ -62,16 +62,60 @@ export default {
       response: "",
       windowWidth: 0,
       userDataLoaded: false,
+      isHome: false,
+      isPathNameResolved: false,
+      isGoogleLoaded: false,
     }
   },
   mounted() {
+    //alert(this.$route.name);
+    //this.isHome = this.$route.name === 'home';
     window.addEventListener("google-loaded", () => {
-      this.renderGBtn('google-signin-btn');
+      // eslint-disable-next-line no-undef
+      if (!gapi.auth2) {
+        // eslint-disable-next-line no-undef
+        gapi.load('auth2', function() {
+        // eslint-disable-next-line no-undef
+        gapi.auth2.init();
+      });
+      }
+      // eslint-disable-next-line no-undef
+      //gapi.auth2.init();
+      //if (!this.isLoggedIn) {
+        //if (this.isHome) {
+          //this.gbtnHomeRenderRequest = true;
+      this.isGoogleLoaded = true;
+          //this.$root.$emit('')
+       // } else {
+          //this.renderGBtn('google-signin-btn');
+     //   }
+      //}
     });
-    this.loadUserInfo();
+    this.loadUserInfo().catch(() => {});
   },
-  created() {
-
+  watch: {
+    $route: function () {
+      this.isHome = this.$route.name === 'home';
+      this.isPathNameResolved = true;
+    },
+    gbtnToRender (newValue) {
+      //alert (newValue);
+      //this.renderGBtn('google-signin-btn');
+      switch (newValue) {
+        case 'nav':
+          //alert (newValue);
+          this.renderGBtn('google-signin-btn');
+          break;
+        case 'home':
+          //this.gbtnHomeRenderRequest = true;
+          //this.hideNavGbtn();
+          this.renderGBtn('google-signin-btn');
+          break;
+        default:
+          this.hideNavGbtn();
+          break;
+      }
+    }
   },
   computed: {
     dogRouteName() {
@@ -80,14 +124,26 @@ export default {
         case 'dog_health': return 'dog_health';
         default: return 'dog_passport';
       }
-    }
+    },
+    gbtnToRender() {
+      if (this.isGoogleLoaded && this.userDataLoaded && this.isPathNameResolved && !this.isLoggedIn)  {
+        return this.isHome ? 'home' : 'nav';
+      } else {
+        return 'none';
+      }
+
+    },
   },
   methods: {
     homeClicked() {
       //this.$root.$emit('home_clicked');   //this event does not reach the child
       if (!this.isLoggedIn) {
-        this.gbtnHomeRenderRequest = true;
+       // this.gbtnHomeRenderRequest = true;
       }
+    },
+    hideNavGbtn() {
+      const item = document.getElementById('google-signin-btn');
+      item.innerHTML = '';
     },
     addDogClicked() {
       this.$root.$emit('new_dog_clicked');
@@ -109,24 +165,28 @@ export default {
     },
 
     signOut() {
-      this.isLoggedIn = false;
-      this.dropdown.user = false;
+      //this.dropdown.user = false;
       document.cookie = "auth_token=false; path=/";
       // eslint-disable-next-line no-undef
         let auth2 = gapi.auth2.getAuthInstance();
         auth2.signOut().then(() => {
+          this.isLoggedIn = false;
           this.$store.commit('wipeUserData');
-          if (this.$route.name === 'home'){
-            this.renderGBtn('google-signin-btn-home')
-          } else {
-            this.renderGBtn('google-signin-btn');
-          }
+          //if (this.isHome){
+            //this.renderGBtn('google-signin-btn-home')
+          //} else {
+            //alert(this.$route.name);
+            //this.renderGBtn('google-signin-btn');
+
+          //}
         });
     },
     onSignIn() {
+      //alert('onSI');
       if (!this.isLoggedIn) {
         this.$store.dispatch('authRequest').then((msg) => {
           this.loadUserInfo().then(() => {
+
             if (msg === 'new_user') {     //this section generates a dog for any newcomer to boost user expirience
               let dog = {
                 name: "Guard Dog",
@@ -164,6 +224,8 @@ export default {
      // this.isLoggedIn = false;
     },
     renderGBtn(buttonId) {
+      const item = document.querySelector('google-signin-btn');
+      if (item?.innerHTML) {return;}
       // eslint-disable-next-line no-undef
       gapi.signin2.render(buttonId, { // this is the button "id"
         onsuccess: this.onSignIn,

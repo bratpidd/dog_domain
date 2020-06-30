@@ -232,7 +232,7 @@ export default {
             })
         },
 
-        getOwnerDogs(context, ownerId) {      //!! MAY BE UNUSED   !!IS USED RIGHT BELOW!!!      //LOAD owner's dogs AND (if it is user) reload user's dogs //may be not that necessary but whatever
+   /*     getOwnerDogs(context, ownerId) {      //!! MAY BE UNUSED   !!IS USED RIGHT BELOW!!!      //LOAD owner's dogs AND (if it is user) reload user's dogs //may be not that necessary but whatever
             return new Promise((resolve, reject) => {
                 axios.get('/server.php', {
                     params: {
@@ -258,7 +258,7 @@ export default {
                     }
                 });
             });
-        },
+        },*/
 
         newDog(context, payload) {
             return new Promise((resolve, reject) => {
